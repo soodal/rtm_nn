@@ -21,11 +21,8 @@ import torch.optim as optim
 from torchvision import datasets
 from torchvision import transforms
 
-#get_ipython().run_line_magic('matplotlib', 'inline')
-
 
 # In[2]:
-
 
 import netCDF4
 import numpy as np
@@ -33,9 +30,7 @@ from pandas import DataFrame
 
 from sklearn.model_selection import train_test_split
 
-
 # In[3]:
-
 
 LUT_file = './LUT/LUT_sca02stM300.nc'
 data = netCDF4.Dataset(LUT_file, mode='r')
