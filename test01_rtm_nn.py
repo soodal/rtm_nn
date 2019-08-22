@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
-
-
 import os
 import time
 import itertools
@@ -21,9 +18,6 @@ import torch.optim as optim
 from torchvision import datasets
 from torchvision import transforms
 
-
-# In[2]:
-
 import netCDF4
 import numpy as np
 from pandas import DataFrame
@@ -31,9 +25,118 @@ from pandas import DataFrame
 from sklearn.model_selection import train_test_split
 
 # In[3]:
+import input_test01_rtm_nn as input_params
 
-LUT_file = './LUT/LUT_sca02stM300.nc'
+
+
+class RTM(Dataset):
+    def __init__(self, X, y=None, transform=None):
+        self.X = X
+        self.y = y
+        self.transform = transform
+        
+    def __len__(self):
+        return len(self.X.index)
+    
+    def __getitem__(self, index): # need for enumerate
+        #image = self.X.iloc[index, ].values.astype(np.uint8).reshape((28, 28, 1))
+        features = self.X.iloc[index, ].values.astype(np.float32)
+        if self.transform is not None:
+            #image = self.transform(image)
+            features = self.transform(features)
+        if self.y is not None:
+            #return image, self.y.iloc[index]
+            return torch.tensor(features), torch.tensor(self.y.iloc[index])
+        else:
+            #return image
+            return features
+
+class MLP(nn.Module):
+    def __init__(self):
+        super(MLP, self).__init__()
+        self.layers = nn.Sequential(
+            linear1,
+            leakyrelu,
+            dropout,
+            linear2,
+            leakyrelu,
+            dropout,
+            linear3,
+            leakyrelu,
+            dropout,
+            linear4,
+            leakyrelu,
+            dropout,
+            linear5,
+            leakyrelu,
+            dropout,
+            linear6,
+            leakyrelu,
+            dropout,
+            linear7
+        )
+        
+    def forward(self, x):
+        # convert tensor (128, 1, 28, 28) --> (128, 1*28*28)
+        x = x.view(x.size(0), -1)
+        x = self.layers(x)
+        return x
+
+
+def rmsre(outputs, target):
+    loss = torch.mean(((outputs - target)/target)**2)
+    return loss
+
+def test_plot(epoch, batch_idx, f_plot, wav, r_plot, outputs):
+    radiances = r_plot.detach().numpy()[batch_idx]
+    nn_radiances = outputs.detach().numpy()[batch_idx]
+    features = f_plot.detach().numpy()[batch_idx]
+
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(7, 10))
+
+    ax.plot(wav, radiances, 'k', label='LBL RTM (True)')
+    ax.plot(wav, nn_radiances, 'b', label='NN RTM results')
+
+    lines, labels = ax.get_legend_handles_labels()
+
+    ax.legend(lines, labels, loc='best')
+
+    plt.title('Neural Network Radiance Simulator Epoch:' + str(epoch).zfill(5))
+    plt.text(280, 0.05, 'Surface pressure = ' + 
+            str(features[0])) 
+    plt.text(280, 0.08, 'Surface albedo = ' +
+            str(features[1])) 
+    plt.text(280, 0.11, 'Relative azimuth angle = ' +
+            str(features[2])) 
+    plt.text(280, 0.14, 'Viewing zenith angle = ' +
+            str(features[3])) 
+    plt.text(280, 0.17, 'Solar zenith angle =' +
+            str(features[4])) 
+
+    pngfile = './plot/01_rtm_nn_normalize_' + lat + toz + '_' + str(epoch).zfill(5) + '.png'
+    txtfile = './plot/01_rtm_nn_normalize_' + lat + toz + '_' + str(epoch).zfill(5) + '.txt'
+    with open(txtfile, 'w') as f:
+        f.write('learning_rate(lr),' + str(lr) + '\n')
+        f.write('surface_pressure,' + str(features[0]) + '\n')
+        f.write('surface_albedo,' + str(features[1]) + '\n')
+        f.write('relative_azimuth_angle,' + str(features[2]) + '\n')
+        f.write('viewing_zenith_angle,'+ str(features[3]) + '\n')
+        f.write('solar_zenith_angle,'+ str(features[4]) + '\n')
+        f.write('wavelength,radiances,nn_radiances\n')
+        for (i, rad) in enumerate(radiances):
+            f.write(str(wav[i]) + ',' + str(radiances[i]) + ',' +
+                    str(nn_radiances[i]) + '\n')
+
+    fig.savefig(pngfile)
+    plt.close()
+
+LUT_file = input_params.LUT_file
+lat = LUT_file[17]
+toz = LUT_file[18:21]
+lr = input_params.lr
+
 data = netCDF4.Dataset(LUT_file, mode='r')
+
 print('nc read done')
 
 sza = data.variables['sza'][:]
@@ -66,9 +169,7 @@ albwf = data.variables['albwf'][:]
 print('albwf allocated')
 o3wf = data.variables['o3wf'][:]
 print('o3wf allocated')
-
 print('cast read variables')
-# In[4]:
 
 X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[]})
 
@@ -149,35 +250,6 @@ X = DataFrame(
 print(X)
 
 
-# In[6]:
-
-
-class RTM(Dataset):
-    def __init__(self, X, y=None, transform=None):
-        self.X = X
-        self.y = y
-        self.transform = transform
-        
-    def __len__(self):
-        return len(self.X.index)
-    
-    def __getitem__(self, index): # need for enumerate
-        #image = self.X.iloc[index, ].values.astype(np.uint8).reshape((28, 28, 1))
-        features = self.X.iloc[index, ].values.astype(np.float32)
-        if self.transform is not None:
-            #image = self.transform(image)
-            features = self.transform(features)
-        if self.y is not None:
-            #return image, self.y.iloc[index]
-            return torch.tensor(features), torch.tensor(self.y.iloc[index])
-        else:
-            #return image
-            return features
-
-
-# In[7]:
-
-
 
 #X = np.array(X)
 #print(X)
@@ -252,41 +324,6 @@ nn.init.xavier_uniform_(linear5.weight)
 nn.init.xavier_uniform_(linear6.weight)
 nn.init.xavier_uniform_(linear7.weight)
 
-class MLP(nn.Module):
-    def __init__(self):
-        super(MLP, self).__init__()
-        self.layers = nn.Sequential(
-            linear1,
-            leakyrelu,
-            dropout,
-            linear2,
-            leakyrelu,
-            dropout,
-            linear3,
-            leakyrelu,
-            dropout,
-            linear4,
-            leakyrelu,
-            dropout,
-            linear5,
-            leakyrelu,
-            dropout,
-            linear6,
-            leakyrelu,
-            dropout,
-            linear7
-        )
-        
-    def forward(self, x):
-        # convert tensor (128, 1, 28, 28) --> (128, 1*28*28)
-        x = x.view(x.size(0), -1)
-        x = self.layers(x)
-        return x
-
-
-def rmsre(outputs, target):
-    loss = torch.mean(((outputs - target)/target)**2)
-    return loss
 
 # In[11]:
 
@@ -301,55 +338,13 @@ print(model)
 # In[12]:
 
 
-optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
+optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 #loss_fn = nn.CrossEntropyLoss()
 #loss_fn = nn.MSELoss()
 loss_fn = nn.rmsre()
 
 
 # In[13]:
-
-def test_plot(epoch, batch_idx, f_plot, wav, r_plot, outputs):
-    radiances = r_plot.detach().numpy()[batch_idx]
-    nn_radiances = outputs.detach().numpy()[batch_idx]
-    features = f_plot.detach().numpy()[batch_idx]
-
-    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(7, 10))
-
-    ax.plot(wav, radiances, 'k', label='LBL RTM (True)')
-    ax.plot(wav, nn_radiances, 'b', label='NN RTM results')
-
-    lines, labels = ax.get_legend_handles_labels()
-
-    ax.legend(lines, labels, loc='best')
-
-    plt.title('Neural Network Radiance Simulator Epoch:' + str(epoch).zfill(5))
-    plt.text(280, 0.05, 'Surface pressure = ' + 
-            str(features[0])) 
-    plt.text(280, 0.08, 'Surface albedo = ' +
-            str(features[1])) 
-    plt.text(280, 0.11, 'Relative azimuth angle = ' +
-            str(features[2])) 
-    plt.text(280, 0.14, 'Viewing zenith angle = ' +
-            str(features[3])) 
-    plt.text(280, 0.17, 'Solar zenith angle =' +
-            str(features[4])) 
-
-    pngfile = './plot/01_rtm_nn_normalize_L250_' + str(epoch).zfill(5) + '.png'
-    txtfile = './plot/01_rtm_nn_normalize_L250_' + str(epoch).zfill(5) + '.txt'
-    with open(txtfile, 'w') as f:
-        f.write('surface_pressure,' + str(features[0]) + '\n')
-        f.write('surface_albedo,' + str(features[1]) + '\n')
-        f.write('relative_azimuth_angle,' + str(features[2]) + '\n')
-        f.write('viewing_zenith_angle,'+ str(features[3]) + '\n')
-        f.write('solar_zenith_angle,'+ str(features[4]) + '\n')
-        f.write('wavelength,radiances,nn_radiances\n')
-        for (i, rad) in enumerate(radiances):
-            f.write(str(wav[i]) + ',' + str(radiances[i]) + ',' +
-                    str(nn_radiances[i]) + '\n')
-
-    fig.savefig(pngfile)
-    plt.close()
 
 
 mean_train_losses = []
