@@ -23,15 +23,15 @@ import numpy as np
 from pandas import DataFrame
 
 from sklearn.model_selection import train_test_split
-import input_test01_rtm_nn as input_params
+#import input_test01_rtm_nn as input_params
 
 from ds_rtm_nn import RTM
-from ds_rtm_nn import MLP
+from ds_rtm_nn import MLPv01_6_800
 from ds_rtm_nn import msre
 from ds_rtm_nn import test_plot300
 from ds_rtm_nn import load_LUT
-from ds_rtm_nn import features_maker
-from ds_rtm_nn import XY_data_loader
+from ds_rtm_nn import features_maker_toz
+from ds_rtm_nn import XY_data_loader_toz_800_train
 from ds_rtm_nn import search_lat_LUT_files
 
 
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     LUT_filelist = search_lat_LUT_files('L')
 
-    model = MLP()
+    model = MLPv01_6_800()
     print(model)
     lr = 0.0001
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     epochs = 1000
 
     _epoch_list = []
-    for (path, dir, files) in os.walk('./states_02/'):
+    for (path, dir, files) in os.walk('./states_06/'):
         for filename in files:
             ext = os.path.splitext(filename)[-1]
 
@@ -65,7 +65,7 @@ if __name__ == '__main__':
                 _epoch_list.append(_epoch)
 
     if len(files) >= 1:
-        torchstatefile = './states_02/' + sorted(files)[-1]
+        torchstatefile = './states_06/' + sorted(files)[-1]
         model.load_state_dict(torch.load(torchstatefile))
         print(_epoch_list)
         print(sorted(_epoch_list)[-1])
@@ -85,15 +85,17 @@ if __name__ == '__main__':
     #with open('./LUT/read_lut_check.txt', 'r') as f:
         #read_lut_list = f.read().splitlines()
 
-    #train_losses = np.load('./losses/test02_train_losses.npy')
-    #valid_losses = np.load('./losses/test02_valid_losses.npy')
+    #train_losses = np.load('./losses/test06_train_losses.npy')
+    #valid_losses = np.load('./losses/test06_valid_losses.npy')
 
     #read_count = 0
 
     for LUT_file in LUT_filelist:
             print('real_epoch check' , real_epoch)
             lat = LUT_file[17]
-            toz = LUT_file[18:21]
+            toz = list(np.array([int(LUT_file[18:21])]))
+            print(toz)
+            
         #if read_count == 4:
             #break
 
@@ -107,15 +109,17 @@ if __name__ == '__main__':
             wav300 = wav[660:]
             wav_num = len(wav300)
 
-            (pre_list, alb_list, raa_list, vza_list, sza_list) = features_maker(pre, alb, raa, vza, sza)    
-            train_loader, valid_loader, test_loader = XY_data_loader(pre_list, alb_list,
-                    raa_list, vza_list, sza_list, rad, albwf, o3wf)
+            (pre_list, alb_list, raa_list, vza_list, sza_list, toz_list) = features_maker_toz(
+                    pre, alb, raa, vza, sza, toz)    
+            train_loader = XY_data_loader_toz_800_train_radlog(pre_list, alb_list,
+                    raa_list, vza_list, sza_list, toz_list, rad, albwf, o3wf)
 
             pre_list = None
             alb_list = None
             raa_list = None
             vza_list = None
             sza_list = None
+            toz_list = None
             rad = None
             albwf = None
             o3wf = None
@@ -146,21 +150,21 @@ if __name__ == '__main__':
             correct = 0
             total = 0
 
-            with torch.no_grad():
-                for i, (features, radiances) in enumerate(valid_loader):
-                    outputs = model(features)
-                    loss = msre(outputs, radiances)
+            #with torch.no_grad():
+                #for i, (features, radiances) in enumerate(valid_loader):
+                    #outputs = model(features)
+                    #loss = msre(outputs, radiances)
                     
-                    #valid_losses.append(loss.item())
-                    valid_losses = np.append(valid_losses, loss.item())
-                    #valid_losses.append(loss.data)
+                    ##valid_losses.append(loss.item())
+                    #valid_losses = np.append(valid_losses, loss.item())
+                    ##valid_losses.append(loss.data)
                    
-                    #_, predicted = torch.max(outputs.data, 1)
-                    #correct += (predicted == radiances).sum().item()
-                    #total += radiances.size(0)
-                    outputs = None
-                    loss = None
-                    del outputs, loss
+                    ##_, predicted = torch.max(outputs.data, 1)
+                    ##correct += (predicted == radiances).sum().item()
+                    ##total += radiances.size(0)
+                    #outputs = None
+                    #loss = None
+                    #del outputs, loss
 
             #with torch.no_grad():
                 #for i, (features, radiances) in enumerate(test_loader):
@@ -182,49 +186,50 @@ if __name__ == '__main__':
             #with open('./LUT/read_lut_list', 'a') as f:
                 #f.write(LUT_file + '\n')
 
-            #np.save('./train_losses/test02_train_losses.npy',
+            #np.save('./train_losses/test06_train_losses.npy',
                     #np.array(train_losses), allow_pickle=True)
-            #np.save('./valid_losses/test02_valid_losses.npy',
+            #np.save('./valid_losses/test06_valid_losses.npy',
                     #np.array(valid_losses), allow_pickle=True)
 
             #read_count += 1
 
     #if read_lut_list == LUT_filelist:
     mean_train_losses.append(np.mean(train_losses))
-    mean_valid_losses.append(np.mean(valid_losses))
+    #mean_valid_losses.append(np.mean(valid_losses))
     #mean_test_losses.append(np.mean(test_losses))
-    print('len mean train losses ', len(mean_train_losses))
+    #print('len mean train losses ', len(mean_train_losses))
 
 #test_loader
-    for batch_idx, (f_plot, r_plot) in enumerate(test_loader):
-        outputs = model(f_plot)
-        loss = msre(outputs, radiances)
-        #if i % 10 == 0:
-            #print(i, outputs)
-        filename = ('./plot/02_rtm_nn_' + lat + '_alltoz_epoch_' + str(epoch).zfill(5) +
-            '_index_' + str(batch_idx).zfill(5))
-        if batch_idx == 0:
-            test_plot300(real_epoch, batch_idx, f_plot, wav300, r_plot,
-                    outputs, filename, lr)
-        if real_epoch % 5 == 0:
-            print(batch_idx)
-            test_plot300(real_epoch, batch_idx, f_plot, wav300, r_plot,
-                    outputs, filename, lr)
+    #for batch_idx, (f_plot, r_plot) in enumerate(test_loader):
+    #for batch_idx, (f_plot, r_plot) in enumerate(valid_loader):
+        #outputs = model(f_plot)
+        #loss = msre(outputs, radiances)
+        ##if i % 10 == 0:
+            ##print(i, outputs)
+        #filename = ('./plot/06_rtm_nn_' + lat + '_alltoz_epoch_' + str(epoch).zfill(5) +
+            #'_index_' + str(batch_idx).zfill(5))
+        #if batch_idx == 0:
+            #test_plot300(real_epoch, batch_idx, f_plot, wav300, r_plot,
+                    #outputs, filename, lr)
+        #if real_epoch % 5 == 0:
+            #print(batch_idx)
+            #test_plot300(real_epoch, batch_idx, f_plot, wav300, r_plot,
+                    #outputs, filename, lr)
 
-        outputs = None
-        del outputs
+        #outputs = None
+        #del outputs
 
-    lossesfile = './result/02_rtm_nn_latL_tozall_mean_losses.txt' 
+    lossesfile = './result/06_rtm_nn_latL_tozall_mean_losses.txt' 
     print('lossesfile')
     if os.path.exists(lossesfile):
         with open(lossesfile, 'a') as f:
             f.write(str(real_epoch).zfill(5) + ',' + str(np.mean(train_losses))
-                    + ',' + str(np.mean(valid_losses))+'\n')
+                    + ',' + '\n')
     else:
         with open(lossesfile, 'w') as f:
             f.write('index,mean_train_losses,mean_valid_losses'+'\n')
             f.write(str(real_epoch).zfill(5) + ',' + str(np.mean(train_losses))
-                    + ',' + str(np.mean(valid_losses))+'\n')
+                    + ',' + '\n')
 
 
     #real_epoch = real_epoch + 1
@@ -233,7 +238,7 @@ if __name__ == '__main__':
     del train_losses, valid_losses
 
     print('torchstatefile')
-    torchstatefile = './states_02/02_rtm_nn_latL_tozall_epoch_' + str(epoch).zfill(5) + '.pth'
+    torchstatefile = './states_06/06_rtm_nn_latL_tozall_epoch_' + str(epoch).zfill(5) + '.pth'
     print('torchstatefile')
     torch.save(model.state_dict(), torchstatefile)
     print('done')

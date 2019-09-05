@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+print('test01_rtm_nn.py code start')
 import os
 import time
 import itertools
@@ -36,9 +37,10 @@ from ds_rtm_nn import features_maker
 from ds_rtm_nn import XY_data_loader
 from ds_rtm_nn import search_LUT_files
 
+print('import done')
 
 if __name__ == '__main__':
-    print('start')
+    print('main start')
     LUT_file = input_params.LUT_file
     lat = LUT_file[17]
     toz = LUT_file[18:21]
@@ -183,12 +185,12 @@ if __name__ == '__main__':
                     timestamp = time.time()
 
         batch_idx = 0
-        filename = ('./plot/01_rtm_nn_' + lat + toz + '_epoch_' + str(epoch).zfill(5) +
+        filename = ('./plot/01_rtm_nn_' + lat + toz + '_epoch_' + str(real_epoch).zfill(5) +
             '_index_' + str(batch_idx).zfill(5))
         test_plot300(real_epoch, batch_idx, features, wav300, radiances,
                 outputs, filename, lr)
 
-        print('test plotting done')
+        print('test plotting done', filename, lat, toz)
         lossesfile = './result/01_rtm_nn_' + lat + toz + '_mean_losses.txt'
         if os.path.exists(lossesfile):
             with open(lossesfile, 'a') as f:
@@ -209,11 +211,13 @@ if __name__ == '__main__':
 
 
     for batch_idx, (features, radiances) in enumerate(test_loader):
-        filename = ('./plot/01_rtm_nn_' + lat + toz + '_epoch_' + str(epoch).zfill(5) +
+        filename = ('./plot/01_rtm_nn_' + lat + toz + '_epoch_' + str(real_epoch).zfill(5) +
             '_index_' + str(batch_idx).zfill(5))
         test_plot300(real_epoch, batch_idx, features, wav300, radiances, outputs,
                 filename, lr)
 # save state
     torchstatefile = './states_01/01_rtm_nn_' + lat + toz + '_epoch_' + str(real_epoch).zfill(5) + '.pth'
     torch.save(model.state_dict(), torchstatefile)
+
+    time.sleep(1)
     print('torch save')
