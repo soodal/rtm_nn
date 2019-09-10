@@ -201,22 +201,23 @@ if __name__ == '__main__':
 
 #test_loader
     #for batch_idx, (f_plot, r_plot) in enumerate(test_loader):
-        #outputs = model(f_plot)
-        #loss = msre(outputs, radiances)
-        ##if i % 10 == 0:
-            ##print(i, outputs)
-        #filename = ('./plot/04_rtm_nn_' + lat + '_alltoz_epoch_' + str(epoch).zfill(5) +
-            #'_index_' + str(batch_idx).zfill(5))
-        #if batch_idx == 0:
-            #test_plot300(real_epoch, batch_idx, f_plot, wav300, r_plot,
-                    #outputs, filename, lr)
-        #if real_epoch % 5 == 0:
-            #print(batch_idx)
-            #test_plot300(real_epoch, batch_idx, f_plot, wav300, r_plot,
-                    #outputs, filename, lr)
+    for batch_idx, (f_plot, r_plot) in enumerate(valid_loader):
+        outputs = model(f_plot)
+        loss = msre(outputs, radiances)
+        #if i % 10 == 0:
+            #print(i, outputs)
+        filename = ('./plot/04_rtm_nn_' + lat + '_alltoz_epoch_' + str(epoch).zfill(5) +
+            '_index_' + str(batch_idx).zfill(5))
+        if batch_idx == 0:
+            test_plot300(real_epoch, batch_idx, f_plot, wav300, r_plot,
+                    outputs, filename, lr)
+        if real_epoch % 5 == 0:
+            print(batch_idx)
+            test_plot300(real_epoch, batch_idx, f_plot, wav300, r_plot,
+                    outputs, filename, lr)
 
-        #outputs = None
-        #del outputs
+        outputs = None
+        del outputs
 
     lossesfile = './result/04_rtm_nn_latL_tozall_mean_losses.txt' 
     print('lossesfile')

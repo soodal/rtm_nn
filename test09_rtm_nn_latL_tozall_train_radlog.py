@@ -31,8 +31,11 @@ from ds_rtm_nn import msre
 from ds_rtm_nn import test_plot300
 from ds_rtm_nn import load_LUT
 from ds_rtm_nn import features_maker_toz
-from ds_rtm_nn import XY_data_loader_toz_800_train
+from ds_rtm_nn import XY_data_loader_toz_800_train_radlog
 from ds_rtm_nn import search_lat_LUT_files
+from ds_rtm_nn import rad_custom_normalize
+from ds_rtm_nn import input_custom_normalize
+from ds_rtm_nn import wav_custom_normalize
 
 
 if __name__ == '__main__':
@@ -56,7 +59,7 @@ if __name__ == '__main__':
     epochs = 1000
 
     _epoch_list = []
-    for (path, dir, files) in os.walk('./states_06/'):
+    for (path, dir, files) in os.walk('./states_09/'):
         for filename in files:
             ext = os.path.splitext(filename)[-1]
 
@@ -65,7 +68,7 @@ if __name__ == '__main__':
                 _epoch_list.append(_epoch)
 
     if len(files) >= 1:
-        torchstatefile = './states_06/' + sorted(files)[-1]
+        torchstatefile = './states_09/' + sorted(files)[-1]
         model.load_state_dict(torch.load(torchstatefile))
         print(_epoch_list)
         print(sorted(_epoch_list)[-1])
@@ -85,8 +88,8 @@ if __name__ == '__main__':
     #with open('./LUT/read_lut_check.txt', 'r') as f:
         #read_lut_list = f.read().splitlines()
 
-    #train_losses = np.load('./losses/test06_train_losses.npy')
-    #valid_losses = np.load('./losses/test06_valid_losses.npy')
+    #train_losses = np.load('./losses/test09_train_losses.npy')
+    #valid_losses = np.load('./losses/test09_valid_losses.npy')
 
     #read_count = 0
 
@@ -108,9 +111,13 @@ if __name__ == '__main__':
             #wav_num = len(wav)
             wav300 = wav[660:]
             wav_num = len(wav300)
+            wav_list = list(wav300)
 
             (pre_list, alb_list, raa_list, vza_list, sza_list, toz_list) = features_maker_toz(
                     pre, alb, raa, vza, sza, toz)    
+
+            #rad_array = rad_custom_normalize(rad)
+
             train_loader = XY_data_loader_toz_800_train_radlog(pre_list, alb_list,
                     raa_list, vza_list, sza_list, toz_list, rad, albwf, o3wf)
 
@@ -126,6 +133,7 @@ if __name__ == '__main__':
 
 
             for i, (features, radiances) in enumerate(train_loader):
+                #if real_epoch == 0:
                 optimizer.zero_grad()
                 outputs = model(features)
                 loss = msre(outputs, radiances)
@@ -186,9 +194,9 @@ if __name__ == '__main__':
             #with open('./LUT/read_lut_list', 'a') as f:
                 #f.write(LUT_file + '\n')
 
-            #np.save('./train_losses/test06_train_losses.npy',
+            #np.save('./train_losses/test09_train_losses.npy',
                     #np.array(train_losses), allow_pickle=True)
-            #np.save('./valid_losses/test06_valid_losses.npy',
+            #np.save('./valid_losses/test09_valid_losses.npy',
                     #np.array(valid_losses), allow_pickle=True)
 
             #read_count += 1
@@ -206,7 +214,7 @@ if __name__ == '__main__':
         #loss = msre(outputs, radiances)
         ##if i % 10 == 0:
             ##print(i, outputs)
-        #filename = ('./plot/06_rtm_nn_' + lat + '_alltoz_epoch_' + str(epoch).zfill(5) +
+        #filename = ('./plot/09_rtm_nn_' + lat + '_alltoz_epoch_' + str(epoch).zfill(5) +
             #'_index_' + str(batch_idx).zfill(5))
         #if batch_idx == 0:
             #test_plot300(real_epoch, batch_idx, f_plot, wav300, r_plot,
@@ -219,7 +227,7 @@ if __name__ == '__main__':
         #outputs = None
         #del outputs
 
-    lossesfile = './result/06_rtm_nn_latL_tozall_mean_losses.txt' 
+    lossesfile = './result/09_rtm_nn_latL_tozall_mean_losses.txt' 
     print('lossesfile')
     if os.path.exists(lossesfile):
         with open(lossesfile, 'a') as f:
@@ -238,7 +246,7 @@ if __name__ == '__main__':
     del train_losses, valid_losses
 
     print('torchstatefile')
-    torchstatefile = './states_06/06_rtm_nn_latL_tozall_epoch_' + str(epoch).zfill(5) + '.pth'
+    torchstatefile = './states_09/09_rtm_nn_latL_tozall_epoch_' + str(epoch).zfill(5) + '.pth'
     print('torchstatefile')
     torch.save(model.state_dict(), torchstatefile)
     print('done')
