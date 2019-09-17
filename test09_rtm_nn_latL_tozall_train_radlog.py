@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     model = MLPv01_6_800()
     print(model)
-    lr = 0.0001
+    lr = 0.00001 # changed from 0.0001 after 223 epoch
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
 #loss_fn = nn.CrossEntropyLoss()
