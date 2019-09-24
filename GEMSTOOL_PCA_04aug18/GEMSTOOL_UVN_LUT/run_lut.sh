@@ -10,7 +10,7 @@ file=./UVNPCA_TOPLEVEL.lut
 lat=15 # 85 for H, 45 for M, 15 for L
 nstokes='1' # n-stokes
 nss='02' # n-stream
-nls='48'
+nls='24'
 
 # output directory
 outdir='/RSL2/soodal/1_DATA/GEMSTOOL/lutdata/sca'$nss'st/'
