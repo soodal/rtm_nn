@@ -251,6 +251,56 @@ class MLPv01_single_wav(nn.Module):
         x = self.layers(x)
         return x
 
+class MLPv02_6_800(nn.Module):
+    def __init__(self):
+
+        linear1 = nn.Linear(6, 200)
+        linear2 = nn.Linear(200, 300)
+        linear3 = nn.Linear(300, 400)
+        linear4 = nn.Linear(400, 500)
+        linear5 = nn.Linear(500, 600)
+        linear6 = nn.Linear(600, 700)
+        linear7 = nn.Linear(700, 800)
+        leakyrelu = nn.LeakyReLU()
+        dropout = nn.Dropout(0.3)
+
+        nn.init.xavier_uniform_(linear1.weight)
+        nn.init.xavier_uniform_(linear2.weight)
+        nn.init.xavier_uniform_(linear3.weight)
+        nn.init.xavier_uniform_(linear4.weight)
+        nn.init.xavier_uniform_(linear5.weight)
+        nn.init.xavier_uniform_(linear6.weight)
+        nn.init.xavier_uniform_(linear7.weight)
+
+        super(MLPv01_6_800, self).__init__()
+        self.layers = nn.Sequential(
+            linear1,
+            leakyrelu,
+            dropout,
+            linear2,
+            leakyrelu,
+            dropout,
+            linear3,
+            leakyrelu,
+            dropout,
+            linear4,
+            leakyrelu,
+            dropout,
+            linear5,
+            leakyrelu,
+            dropout,
+            linear6,
+            leakyrelu,
+            dropout,
+            linear7
+        )
+        
+    def forward(self, x):
+        # convert tensor (128, 1, 28, 28) --> (128, 1*28*28)
+        x = x.view(x.size(0), -1)
+        x = self.layers(x)
+        return x
+
 class MLPv01_6_800(nn.Module):
     def __init__(self):
 
