@@ -31,6 +31,7 @@ from ds_rtm_nn import msre
 from ds_rtm_nn import test_plot300
 from ds_rtm_nn import load_LUT
 from ds_rtm_nn import features_maker_toz
+from ds_rtm_nn import XY_data_loader_toz_800_v2_sza_train
 from ds_rtm_nn import XY_data_loader_toz_800_v2_sza_test
 from ds_rtm_nn import search_lat_LUT_files
 from ds_rtm_nn import rad_custom_normalize
@@ -120,22 +121,20 @@ if __name__ == '__main__':
         sza_train_idx = np.array([0, 16, 31, 44, 55, 64, 71, 77, 82, 86, 89,
             91], dtype=np.int)
         sza_test_idx = np.array([1,2,3,4,5,6,7,8,9,
-                                10,11,12,13,14,15,17,18,19,20, 
-                                20,21,22,23,24,25,26,27,28,29,30, 
-                                30,32,33,34,35,36,37,38,39,40, 
-                                40,41,42,43,45,46,47,48,49,50, 
-                                50,51,52,53,54,56,57,58,59,60, 
-                                60,61,62,63,65,66,67,68,69,70, 
-                                70,72,73,74,75,76,78,79,80, 
-                                80,81,83,84,85,87,88,90, 
-                                90,91,92])
-
-
+                                10,11,12,13,14,15,17,18,19,
+                                20,21,22,23,24,25,26,27,28,29,
+                                30,32,33,34,35,36,37,38,39,
+                                40,41,42,43,45,46,47,48,49,
+                                50,51,52,53,54,56,57,58,59,
+                                60,61,62,63,65,66,67,68,69,
+                                70,72,73,74,75,76,78,79,
+                                80,81,83,84,85,87,88,
+                                90,92], dtype=np.int)
         
         (pre_list, alb_list, raa_list, vza_list, sza_list, toz_list) = features_maker_toz(
                 pre, alb, raa, vza, sza[sza_train_idx], toz)    
     
-        train_loader = XY_data_loader_toz_800_v2_sza_test(pre_list, alb_list,
+        train_loader = XY_data_loader_toz_800_v2_sza_train(pre_list, alb_list,
                 raa_list, vza_list, sza_list, toz_list, 
                 rad[0][0][0][0][sza_train_idx][:], 
                 albwf[0][0][0][0][sza_train_idx][:], 

@@ -943,7 +943,7 @@ def XY_data_loader_toz_800_train_radlog(pre_list, alb_list, raa_list, vza_list, 
     #test_loader = DataLoader(dataset=test_dataset, batch_size=128, shuffle=False)
     return train_loader#, test_loader
 
-def XY_data_loader_toz_800_v2_sza_test(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
+def XY_data_loader_toz_800_v2_sza_train(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
         rad, albwf, o3wf):
 
     (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
@@ -953,9 +953,6 @@ def XY_data_loader_toz_800_v2_sza_test(pre_list, alb_list, raa_list, vza_list, s
     rad_array = rad_custom_normalize(rad)
 
     X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
-    #print(toz_list)
-    #print(np.array(toz_list))
-    #print(np.array(toz_list)/550)
     X = DataFrame({
         'pre':pre_array,
         'alb':alb_array,
@@ -968,16 +965,35 @@ def XY_data_loader_toz_800_v2_sza_test(pre_list, alb_list, raa_list, vza_list, s
     rad_ = rad_[:, 660:]
     Y = DataFrame(rad_)
 
-
-    #X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0, random_state=2160)
-    #X_train, X_valid, Y_train, Y_valid = train_test_split(X_, Y_, test_size = 1/6, random_state=2161)
     train_dataset = RTM(X=X, y=Y, transform=None)
-    #valid_dataset = RTM(X=X_valid, y=Y_valid, transform=None)
-    #test_dataset = RTM(X=X_test, y=Y_test, transform=None)
     train_loader = DataLoader(dataset=train_dataset, batch_size=128, shuffle=True)
-    #valid_loader = DataLoader(dataset=valid_dataset, batch_size=128, shuffle=False)
-    #test_loader = DataLoader(dataset=test_dataset, batch_size=128, shuffle=False)
-    return train_loader#, test_loader
+    return train_loader
+
+def XY_data_loader_toz_800_v2_sza_test(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
+        rad, albwf, o3wf):
+
+    (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
+            ) = input_custom_normalize(pre_list, alb_list, 
+                    raa_list, vza_list, sza_list, toz_list)
+
+    rad_array = rad_custom_normalize(rad)
+
+    X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
+    X = DataFrame({
+        'pre':pre_array,
+        'alb':alb_array,
+        'raa':raa_array,
+        'vza':vza_array,
+        'sza':sza_array,
+        'toz':toz_array})#, 'wav':wav_list}))
+
+    rad_ = rad_array.reshape((81*1*1*1*1, 1460))
+    rad_ = rad_[:, 660:]
+    Y = DataFrame(rad_)
+
+    test_dataset = RTM(X=X, y=Y, transform=None)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=128, shuffle=False)
+    return test_loader
 
 
 def XY_data_loader_single_wav_train(pre_list, alb_list, raa_list, vza_list, 
