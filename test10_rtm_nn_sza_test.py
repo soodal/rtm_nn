@@ -196,7 +196,6 @@ if __name__ == '__main__':
                 #print(loss.item())
                 #timestamp = time.time()
 
-
             if epoch_local % 100 == 0:
                 for inbatch in range(12):
                     #print(i, outputs)
@@ -243,9 +242,6 @@ if __name__ == '__main__':
                 #_, predicted = torch.max(outputs.data, 1)
                 #correct += (predicted == radiances).sum().item()
                 #total += radiances.size(0)
-                outputs = None
-                #loss = None
-                #del outputs, loss
                 if epoch_local % 500 == 0:
                     for inbatch in range(len(test_loader)):
                         filename = ('./plot/10_rtm_nn_nl24_' + lat + 
