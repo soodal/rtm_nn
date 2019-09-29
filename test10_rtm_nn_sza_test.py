@@ -81,8 +81,10 @@ if __name__ == '__main__':
             checkpoint = torch.load(torchstatefile)
             model.load_state_dict(checkpoint['model_state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-            epoch = checkpoint['epoch']
+            epoch_local = checkpoint['epoch']
             loss = checkpoint['loss']
+            if real_epoch -1 !=  epoch_local:
+                quit()
 
         #print(_epoch_list)
         #print(sorted(_epoch_list)[-1])
@@ -108,7 +110,7 @@ if __name__ == '__main__':
 
         #for LUT_file in LUT_filelist:
 
-        print('real_epoch check' , real_epoch)
+        print('real_epoch check' , epoch_local)
         #print(LUT_file)
         lat = LUT_file[-16]
         #print(lat)
@@ -204,8 +206,8 @@ if __name__ == '__main__':
                     
 
             outputs = None
-            loss = None
-            del outputs, loss
+            #loss = None
+            #del outputs, loss
                 
         model.eval()
         correct = 0
@@ -240,8 +242,8 @@ if __name__ == '__main__':
                 #correct += (predicted == radiances).sum().item()
                 #total += radiances.size(0)
                 outputs = None
-                loss = None
-                del outputs, loss
+                #loss = None
+                #del outputs, loss
 
 
         #with open('./LUT/read_lut_list', 'a') as f:
@@ -302,17 +304,15 @@ if __name__ == '__main__':
 
 
         #real_epoch = real_epoch + 1
-        train_losses = None
-        valid_losses = None
-        del train_losses, valid_losses
+        #train_losses = None
+        #valid_losses = None
+        #del train_losses, valid_losses
 
-        #print('torchstatefile')
         torchstatefile = './states_10/10_rtm_nn_sza_test_epoch_' + str(epoch_local).zfill(8) + '.pth'
-        #print('torchstatefile')
         if epoch_local % 100 == 0:
-            torch.save({'epoch':epoch, 
+            torch.save({'epoch':epoch_local, 
                 'model_state_dict': model.state_dict(), 
                 'optimizer_state_dict':optimizer.state_dict(),
-                'loss': loss})
+                'loss': np.mean(train_losses)}, torchstatefile)
                 
         print('done')
