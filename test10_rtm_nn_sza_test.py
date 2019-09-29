@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     model = MLPv02_6_800()
     print(model)
-    lr = 0.00001
+    lr = 0.0001
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
 #loss_fn = nn.CrossEntropyLoss()
@@ -196,13 +196,15 @@ if __name__ == '__main__':
                 #print(loss.item())
                 #timestamp = time.time()
 
-            #for inbatch in range(12):
-                ##print(i, outputs)
-                #filename = ('./plot/10_rtm_nn_nl24_' + lat + '_toz300_epoch_' + str(epoch_local).zfill(8) +
-                    #'_train_index_' + str(i).zfill(8))
-                ## every each epoch, plot for first
-                #test_plot300(epoch_local, inbatch, features, wav300, 
-                        #radiances, outputs, filename, lr)
+
+            if epoch_local % 100 == 0:
+                for inbatch in range(12):
+                    #print(i, outputs)
+                    filename = ('./plot/10_rtm_nn_nl24_' + lat + '_toz300_epoch_' + str(epoch_local).zfill(8) +
+                        '_train_index_' + str(i).zfill(8) + '_inbatch_' + str(inbatch).zfill(8))
+                    # every each epoch, plot for first
+                    test_plot300(epoch_local, inbatch, features, wav300, 
+                            radiances, outputs, filename, lr)
                     
 
             outputs = None
@@ -244,6 +246,13 @@ if __name__ == '__main__':
                 outputs = None
                 #loss = None
                 #del outputs, loss
+                if epoch_local % 500 == 0:
+                    for inbatch in range(len(test_loader)):
+                        filename = ('./plot/10_rtm_nn_nl24_' + lat + 
+                                '_toz300_epoch_' + str(epoch_local).zfill(8) +
+                            '_test_index_' + str(i).zfill(8) + '_inbatch_' + str(inbatch).zfill(8))
+                        test_plot300(epoch_local, inbatch, features, wav300, radiances,
+                                outputs, filename, lr)
 
 
         #with open('./LUT/read_lut_list', 'a') as f:
