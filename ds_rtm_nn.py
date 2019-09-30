@@ -358,14 +358,14 @@ def msre(outputs, target):
 
 def test_plot300(epoch, batch_idx, f_plot, wav300, r_plot, outputs, filename,
         lr):
-    print('test_plot300 def start')
+    #print('test_plot300 def start')
     radiances = r_plot.detach().numpy()[batch_idx]
     nn_radiances = outputs.detach().numpy()[batch_idx]
     features = f_plot.detach().numpy()[batch_idx]
     loss_ = msre(r_plot[batch_idx], outputs[batch_idx])
     fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(7, 5))
     ax2 = ax1.twinx()
-    print('test_plot300 def 01')
+    #print('test_plot300 def 01')
 
 # line plot
     line1 = ax1.plot(wav300, radiances, 'k', label='LBL RTM (True)')
@@ -374,12 +374,12 @@ def test_plot300(epoch, batch_idx, f_plot, wav300, r_plot, outputs, filename,
     diffcolor = 'r'
 
 
-    print('test_plot300 rdef 01')
+    #print('test_plot300 rdef 01')
 # labels, units 
     ax1.set_xlabel('Wavelength[nm]')
     ax1.set_ylabel('Normalized Radiance[1/sr]')
 
-    print('test_plot300 def 01')
+    #print('test_plot300 def 01')
     lines, labels = ax1.get_legend_handles_labels()
     ax1.legend(lines, labels, loc='best')
     plt.title('Neural Network Radiance Simulator Epoch:' + str(epoch).zfill(5))
@@ -402,7 +402,7 @@ def test_plot300(epoch, batch_idx, f_plot, wav300, r_plot, outputs, filename,
     plt.text(300, 0.02, 'Batch_index =' +
             str(batch_idx), fontsize=16) 
 
-    print('test_plot300 def 01')
+    #print('test_plot300 def 01')
     #plt.text(320, max(max(radiances), max(nn_radiances))*0.2, 'MSRE = ' +
     plt.text(320, 0.02, 'MSRE = ' +
             str(format(loss_.item(), ".10f")), fontsize=16)
@@ -418,25 +418,25 @@ def test_plot300(epoch, batch_idx, f_plot, wav300, r_plot, outputs, filename,
 
     pngfile = filename + '.png'
     txtfile = filename + '.txt'
-    print(pngfile)
+    #print(pngfile)
 
     fig.savefig(pngfile)
     plt.close()
 
-    print('test_plot300 def write')
+    #print('test_plot300 def write')
     with open(txtfile, 'w') as f:
         f.write('learning_rate(lr),' + str(lr) + '\n')
-        print('test_plot300 def write 01')
+        #print('test_plot300 def write 01')
         f.write('surface_pressure,' + str(features[0]) + '\n')
-        print('test_plot300 def write 02')
+        #print('test_plot300 def write 02')
         f.write('surface_albedo,' + str(features[1]) + '\n')
-        print('test_plot300 def write 03')
+        #print('test_plot300 def write 03')
         f.write('relative_azimuth_angle,' + str(features[2]) + '\n')
-        print('test_plot300 def write 04')
+        #print('test_plot300 def write 04')
         f.write('viewing_zenith_angle,'+ str(features[3]) + '\n')
-        print('test_plot300 def write 05')
+        #print('test_plot300 def write 05')
         f.write('solar_zenith_angle,'+ str(features[4]) + '\n')
-        print('test_plot300 def write 06')
+        #print('test_plot300 def write 06')
         f.write('wavelength,radiances,nn_radiances\n')
         for (i, rad) in enumerate(radiances):
             f.write(str(wav300[i]) + ',' + str(rad) + ',' + str(nn_radiances[i]) + '\n')
@@ -808,9 +808,12 @@ def input_custom_normalize(pre_list, alb_list, raa_list, vza_list, sza_list,
     toz_array = np.array(toz_list)/550
     return (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array)
 
+
 def rad_custom_normalize(rad):
     rad_array = np.log(rad)
     return rad_array
+
+
 
 def wav_custom_normalize(wav_list):
     wav_array = np.array(wav_list)/340
@@ -943,6 +946,59 @@ def XY_data_loader_toz_800_train_radlog(pre_list, alb_list, raa_list, vza_list, 
     #test_loader = DataLoader(dataset=test_dataset, batch_size=128, shuffle=False)
     return train_loader#, test_loader
 
+def XY_data_loader_toz_800_v2_sza_all(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
+        rad, albwf, o3wf):
+
+    (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
+            ) = input_custom_normalize(pre_list, alb_list, 
+                    raa_list, vza_list, sza_list, toz_list)
+
+    rad_array = rad_custom_normalize(rad)
+
+    X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
+    X = DataFrame({
+        'pre':pre_array,
+        'alb':alb_array,
+        'raa':raa_array,
+        'vza':vza_array,
+        'sza':sza_array,
+        'toz':toz_array})#, 'wav':wav_list}))
+
+    rad_ = rad_array.reshape((93*1*1*1*1, 1460))
+    rad_ = rad_[:, 660:]
+    Y = DataFrame(rad_)
+
+    train_dataset = RTM(X=X, y=Y, transform=None)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=128, shuffle=True)
+    return train_loader
+
+def XY_data_loader_toz_800_v3_sza_train(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
+        rad, albwf, o3wf):
+
+    (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
+            ) = input_custom_normalize(pre_list, alb_list, 
+                    raa_list, vza_list, sza_list, toz_list)
+
+    #rad_array = rad_custom_normalize(rad)
+    rad_array = rad
+
+    X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
+    X = DataFrame({
+        'pre':pre_array,
+        'alb':alb_array,
+        'raa':raa_array,
+        'vza':vza_array,
+        'sza':sza_array,
+        'toz':toz_array})#, 'wav':wav_list}))
+
+    rad_ = rad_array.reshape((12*1*1*1*1, 1460))
+    rad_ = rad_[:, 660:]
+    Y = DataFrame(rad_)
+
+    train_dataset = RTM(X=X, y=Y, transform=None)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=128, shuffle=True)
+    return train_loader
+
 def XY_data_loader_toz_800_v2_sza_train(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
         rad, albwf, o3wf):
 
@@ -968,6 +1024,33 @@ def XY_data_loader_toz_800_v2_sza_train(pre_list, alb_list, raa_list, vza_list, 
     train_dataset = RTM(X=X, y=Y, transform=None)
     train_loader = DataLoader(dataset=train_dataset, batch_size=128, shuffle=True)
     return train_loader
+
+def XY_data_loader_toz_800_v3_sza_test(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
+        rad, albwf, o3wf):
+
+    (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
+            ) = input_custom_normalize(pre_list, alb_list, 
+                    raa_list, vza_list, sza_list, toz_list)
+
+    #rad_array = rad_custom_normalize(rad)
+    rad_array = rad
+
+    X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
+    X = DataFrame({
+        'pre':pre_array,
+        'alb':alb_array,
+        'raa':raa_array,
+        'vza':vza_array,
+        'sza':sza_array,
+        'toz':toz_array})#, 'wav':wav_list}))
+
+    rad_ = rad_array.reshape((81*1*1*1*1, 1460))
+    rad_ = rad_[:, 660:]
+    Y = DataFrame(rad_)
+
+    test_dataset = RTM(X=X, y=Y, transform=None)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=128, shuffle=False)
+    return test_loader
 
 def XY_data_loader_toz_800_v2_sza_test(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
         rad, albwf, o3wf):
