@@ -251,6 +251,184 @@ class MLPv01_single_wav(nn.Module):
         x = self.layers(x)
         return x
 
+class MLPv03_13_6_800(nn.Module):
+    def __init__(self):
+
+        linear01 = nn.Linear(6, 200)
+        linear02 = nn.Linear(200, 300)
+        linear03 = nn.Linear(300, 300)
+        linear04 = nn.Linear(300, 400)
+        linear05 = nn.Linear(400, 400)
+        linear06 = nn.Linear(400, 500)
+        linear07 = nn.Linear(500, 500)
+        linear08 = nn.Linear(500, 600)
+        linear09 = nn.Linear(600, 600)
+        linear10 = nn.Linear(600, 700)
+        linear11 = nn.Linear(700, 700)
+        linear12 = nn.Linear(700, 800)
+        linear13 = nn.Linear(800, 800)
+        leakyrelu = nn.LeakyReLU()
+        dropout = nn.Dropout(0.3)
+
+        nn.init.xavier_uniform_(linear01.weight)
+        nn.init.xavier_uniform_(linear02.weight)
+        nn.init.xavier_uniform_(linear03.weight)
+        nn.init.xavier_uniform_(linear04.weight)
+        nn.init.xavier_uniform_(linear05.weight)
+        nn.init.xavier_uniform_(linear06.weight)
+        nn.init.xavier_uniform_(linear07.weight)
+        nn.init.xavier_uniform_(linear08.weight)
+        nn.init.xavier_uniform_(linear09.weight)
+        nn.init.xavier_uniform_(linear10.weight)
+        nn.init.xavier_uniform_(linear11.weight)
+        nn.init.xavier_uniform_(linear12.weight)
+        nn.init.xavier_uniform_(linear13.weight)
+
+        super(MLPv03_13_6_800, self).__init__()
+        self.layers = nn.Sequential(
+            linear01,
+            leakyrelu,
+            dropout,
+            linear02,
+            leakyrelu,
+            dropout,
+            linear03,
+            leakyrelu,
+            dropout,
+            linear04,
+            leakyrelu,
+            dropout,
+            linear05,
+            leakyrelu,
+            dropout,
+            linear06,
+            leakyrelu,
+            dropout,
+            linear07,
+            leakyrelu,
+            dropout,
+            linear08,
+            leakyrelu,
+            dropout,
+            linear09,
+            leakyrelu,
+            dropout,
+            linear10,
+            leakyrelu,
+            dropout,
+            linear11,
+            leakyrelu,
+            dropout,
+            linear12,
+            leakyrelu,
+            dropout,
+            linear13
+        )
+        
+    def forward(self, x):
+        # convert tensor (128, 1, 28, 28) --> (128, 1*28*28)
+        x = x.view(x.size(0), -1)
+        x = self.layers(x)
+        return x
+class MLPv03_7_6_800(nn.Module):
+    def __init__(self):
+
+        linear1 = nn.Linear(6, 200)
+        linear2 = nn.Linear(200, 300)
+        linear3 = nn.Linear(300, 400)
+        linear4 = nn.Linear(400, 500)
+        linear5 = nn.Linear(500, 600)
+        linear6 = nn.Linear(600, 700)
+        linear7 = nn.Linear(700, 800)
+        leakyrelu = nn.LeakyReLU()
+        dropout = nn.Dropout(0.3)
+
+        nn.init.xavier_uniform_(linear1.weight)
+        nn.init.xavier_uniform_(linear2.weight)
+        nn.init.xavier_uniform_(linear3.weight)
+        nn.init.xavier_uniform_(linear4.weight)
+        nn.init.xavier_uniform_(linear5.weight)
+        nn.init.xavier_uniform_(linear6.weight)
+        nn.init.xavier_uniform_(linear7.weight)
+
+        super(MLPv03_7_6_800, self).__init__()
+        self.layers = nn.Sequential(
+            linear1,
+            leakyrelu,
+            dropout,
+            linear2,
+            leakyrelu,
+            dropout,
+            linear3,
+            leakyrelu,
+            dropout,
+            linear4,
+            leakyrelu,
+            dropout,
+            linear5,
+            leakyrelu,
+            dropout,
+            linear6,
+            leakyrelu,
+            dropout,
+            linear7
+        )
+        
+    def forward(self, x):
+        # convert tensor (128, 1, 28, 28) --> (128, 1*28*28)
+        x = x.view(x.size(0), -1)
+        x = self.layers(x)
+        return x
+
+class MLPv02_6_200(nn.Module):
+    def __init__(self):
+
+        linear1 = nn.Linear(6, 200)
+        linear2 = nn.Linear(200, 200)
+        linear3 = nn.Linear(200, 200)
+        linear4 = nn.Linear(200, 200)
+        linear5 = nn.Linear(200, 200)
+        linear6 = nn.Linear(200, 200)
+        linear7 = nn.Linear(200, 200)
+        leakyrelu = nn.LeakyReLU()
+        dropout = nn.Dropout(0.3)
+
+        nn.init.xavier_uniform_(linear1.weight)
+        nn.init.xavier_uniform_(linear2.weight)
+        nn.init.xavier_uniform_(linear3.weight)
+        nn.init.xavier_uniform_(linear4.weight)
+        nn.init.xavier_uniform_(linear5.weight)
+        nn.init.xavier_uniform_(linear6.weight)
+        nn.init.xavier_uniform_(linear7.weight)
+
+        super(MLPv02_6_200, self).__init__()
+        self.layers = nn.Sequential(
+            linear1,
+            leakyrelu,
+            dropout,
+            linear2,
+            leakyrelu,
+            dropout,
+            linear3,
+            leakyrelu,
+            dropout,
+            linear4,
+            leakyrelu,
+            dropout,
+            linear5,
+            leakyrelu,
+            dropout,
+            linear6,
+            leakyrelu,
+            dropout,
+            linear7,
+        )
+        
+    def forward(self, x):
+        # convert tensor (128, 1, 28, 28) --> (128, 1*28*28)
+        x = x.view(x.size(0), -1)
+        x = self.layers(x)
+        return x
 class MLPv02_6_800(nn.Module):
     def __init__(self):
 
@@ -352,20 +530,27 @@ class MLPv01_6_800(nn.Module):
         return x
 
 
+def msre_max(outputs, target):
+    loss = torch.max(((outputs - target)/target)**2)
+    return loss
+
+def msre_log(outputs, target):
+    loss = torch.log(torch.mean(((outputs - target)/target)**2))
+    return loss
+
 def msre(outputs, target):
     loss = torch.mean(((outputs - target)/target)**2)
     return loss
 
-def test_plot300(epoch, batch_idx, f_plot, wav300, r_plot, outputs, filename,
+
+def test_plot300_radlog(epoch, batch_idx, f_plot, wav300, r_plot, outputs, filename,
         lr):
-    #print('test_plot300 def start')
-    radiances = r_plot.detach().numpy()[batch_idx]
-    nn_radiances = outputs.detach().numpy()[batch_idx]
+    radiances = np.exp(r_plot.detach().numpy()[batch_idx])
+    nn_radiances = np.exp(outputs.detach().numpy()[batch_idx])
     features = f_plot.detach().numpy()[batch_idx]
-    loss_ = msre(r_plot[batch_idx], outputs[batch_idx])
+    loss_ = mse(radiances, nn_radiances)
     fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(7, 5))
     ax2 = ax1.twinx()
-    #print('test_plot300 def 01')
 
 # line plot
     line1 = ax1.plot(wav300, radiances, 'k', label='LBL RTM (True)')
@@ -374,12 +559,10 @@ def test_plot300(epoch, batch_idx, f_plot, wav300, r_plot, outputs, filename,
     diffcolor = 'r'
 
 
-    #print('test_plot300 rdef 01')
 # labels, units 
     ax1.set_xlabel('Wavelength[nm]')
     ax1.set_ylabel('Normalized Radiance[1/sr]')
 
-    #print('test_plot300 def 01')
     lines, labels = ax1.get_legend_handles_labels()
     ax1.legend(lines, labels, loc='best')
     plt.title('Neural Network Radiance Simulator Epoch:' + str(epoch).zfill(5))
@@ -402,9 +585,154 @@ def test_plot300(epoch, batch_idx, f_plot, wav300, r_plot, outputs, filename,
     plt.text(300, 0.02, 'Batch_index =' +
             str(batch_idx), fontsize=16) 
 
-    #print('test_plot300 def 01')
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.2, 'MSE = ' +
+    plt.text(320, 0.02, 'MSE = ' +
+            str(format(loss_.item(), ".10f")), fontsize=16)
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.1, 'MSE total = ' + str(loss))
+
+    ax2.set_ylabel('Relative Differences Ratio')
+    ax2.set_ylim([-0.1, 0.1])
+    line3 = ax2.plot(wav300, (nn_radiances - radiances)/radiances, diffcolor, 
+            linestyle='--', label='Relative Differences')
+    zeros = np.zeros((len(wav300)))
+    
+    line4 = ax2.plot(wav300, zeros, 'grey', linestyle=':')
+
+    pngfile = filename + '.png'
+    txtfile = filename + '.txt'
+    #print(pngfile)
+
+    fig.savefig(pngfile)
+    plt.close()
+
+    with open(txtfile, 'w') as f:
+        f.write('learning_rate(lr),' + str(lr) + '\n')
+        f.write('surface_pressure,' + str(features[0]) + '\n')
+        f.write('surface_albedo,' + str(features[1]) + '\n')
+        f.write('relative_azimuth_angle,' + str(features[2]) + '\n')
+        f.write('viewing_zenith_angle,'+ str(features[3]) + '\n')
+        f.write('solar_zenith_angle,'+ str(features[4]) + '\n')
+        f.write('wavelength,radiances,nn_radiances\n')
+        for (i, rad) in enumerate(radiances):
+            f.write(str(wav300[i]) + ',' + str(rad) + ',' + str(nn_radiances[i]) + '\n')
+
+def test_plot300_mse(epoch, batch_idx, f_plot, wav300, r_plot, outputs, filename,
+        lr):
+    radiances = r_plot.detach().numpy()[batch_idx]
+    nn_radiances = outputs.detach().numpy()[batch_idx]
+    features = f_plot.detach().numpy()[batch_idx]
+    loss_ = mse(r_plot[batch_idx], outputs[batch_idx])
+    fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(7, 5))
+    ax2 = ax1.twinx()
+
+# line plot
+    line1 = ax1.plot(wav300, radiances, 'k', label='LBL RTM (True)')
+    line2 = ax1.plot(wav300, nn_radiances, 'b', label='NN RTM results')
+
+    diffcolor = 'r'
+
+
+# labels, units 
+    ax1.set_xlabel('Wavelength[nm]')
+    ax1.set_ylabel('Normalized Radiance[1/sr]')
+
+    lines, labels = ax1.get_legend_handles_labels()
+    ax1.legend(lines, labels, loc='best')
+    plt.title('Neural Network Radiance Simulator Epoch:' + str(epoch).zfill(5))
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.3, 'Surface pressure = ' + 
+    plt.text(300, -0.03, 'Surface pressure = ' + 
+            str(format(float(features[0]) * 1050, ".2f")), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.4, 'Surface albedo = ' +
+    plt.text(300, -0.02, 'Surface albedo = ' +
+            str(features[1]), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.5, 'Relative azimuth angle = ' +
+    plt.text(300, -0.01, 'Relative azimuth angle = ' +
+            str(float(features[2]) * 180), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.6, 'Viewing zenith angle = ' +
+    plt.text(300, 0, 'Viewing zenith angle = ' +
+            str(float(features[3]) * 180 / np.pi), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.7, 'Solar zenith angle =' +
+    plt.text(300, 0.01, 'Solar zenith angle =' +
+            str(float(features[4]) * 180 / np.pi), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.8, 'Batch_index =' +
+    plt.text(300, 0.02, 'Batch_index =' +
+            str(batch_idx), fontsize=16) 
+
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.2, 'MSE = ' +
+    plt.text(320, 0.02, 'MSE = ' +
+            str(format(loss_.item(), ".10f")), fontsize=16)
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.1, 'MSE total = ' + str(loss))
+
+    ax2.set_ylabel('Relative Differences Ratio')
+    ax2.set_ylim([-0.1, 0.1])
+    line3 = ax2.plot(wav300, (nn_radiances - radiances)/radiances, diffcolor, 
+            linestyle='--', label='Relative Differences')
+    zeros = np.zeros((len(wav300)))
+    
+    line4 = ax2.plot(wav300, zeros, 'grey', linestyle=':')
+
+    pngfile = filename + '.png'
+    txtfile = filename + '.txt'
+    #print(pngfile)
+
+    fig.savefig(pngfile)
+    plt.close()
+
+    with open(txtfile, 'w') as f:
+        f.write('learning_rate(lr),' + str(lr) + '\n')
+        f.write('surface_pressure,' + str(features[0]) + '\n')
+        f.write('surface_albedo,' + str(features[1]) + '\n')
+        f.write('relative_azimuth_angle,' + str(features[2]) + '\n')
+        f.write('viewing_zenith_angle,'+ str(features[3]) + '\n')
+        f.write('solar_zenith_angle,'+ str(features[4]) + '\n')
+        f.write('wavelength,radiances,nn_radiances\n')
+        for (i, rad) in enumerate(radiances):
+            f.write(str(wav300[i]) + ',' + str(rad) + ',' + str(nn_radiances[i]) + '\n')
+
+def test_plot300_01(epoch, batch_idx, f_plot, wav300, r_plot, outputs, filename,
+        lr):
+    radiances = r_plot.detach().numpy()[batch_idx]
+    nn_radiances = outputs.detach().numpy()[batch_idx]
+    features = f_plot.detach().numpy()[batch_idx]
+    loss_ = msre(r_plot[batch_idx], outputs[batch_idx])
+    fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(7, 5))
+    ax2 = ax1.twinx()
+
+# line plot
+    line1 = ax1.plot(wav300, radiances, 'k', label='LBL RTM (True)')
+    line2 = ax1.plot(wav300, nn_radiances, 'b', label='NN RTM results')
+
+    diffcolor = 'r'
+
+
+# labels, units 
+    ax1.set_xlabel('Wavelength[nm]')
+    ax1.set_ylabel('Normalized Radiance[1/sr]')
+
+    lines, labels = ax1.get_legend_handles_labels()
+    ax1.legend(lines, labels, loc='best')
+    plt.title('Neural Network Radiance Simulator Epoch:' + str(epoch).zfill(5))
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.3, 'Surface pressure = ' + 
+    #plt.text(300, -0.03, 'Surface pressure = ' + 
+            #str(format(float(features[0]) * 1050, ".2f")), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.4, 'Surface albedo = ' +
+    #plt.text(300, -0.02, 'Surface albedo = ' +
+            #str(features[1]), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.5, 'Relative azimuth angle = ' +
+    #plt.text(300, -0.01, 'Relative azimuth angle = ' +
+            #str(float(features[2]) * 180), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.6, 'Viewing zenith angle = ' +
+    #plt.text(300, 0, 'Viewing zenith angle = ' +
+            #str(float(features[3]) * 180 / np.pi), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.7, 'Solar zenith angle =' +
+    plt.text(300, 0.01, 'Solar zenith angle =' +
+            str(float(features[0]) * 180 / np.pi), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.8, 'Batch_index =' +
+    plt.text(300, 0.02, 'Batch_index =' +
+            str(batch_idx), fontsize=16) 
+
     #plt.text(320, max(max(radiances), max(nn_radiances))*0.2, 'MSRE = ' +
-    plt.text(320, 0.02, 'MSRE = ' +
+    plt.text(320, 0.02, 'MSE = ' +
             str(format(loss_.item(), ".10f")), fontsize=16)
     #plt.text(320, max(max(radiances), max(nn_radiances))*0.1, 'MSRE total = ' + str(loss))
 
@@ -423,20 +751,405 @@ def test_plot300(epoch, batch_idx, f_plot, wav300, r_plot, outputs, filename,
     fig.savefig(pngfile)
     plt.close()
 
-    #print('test_plot300 def write')
     with open(txtfile, 'w') as f:
         f.write('learning_rate(lr),' + str(lr) + '\n')
-        #print('test_plot300 def write 01')
+        #f.write('surface_pressure,' + str(features[0]) + '\n')
+        #f.write('surface_albedo,' + str(features[1]) + '\n')
+        #f.write('relative_azimuth_angle,' + str(features[2]) + '\n')
+        #f.write('viewing_zenith_angle,'+ str(features[3]) + '\n')
+        f.write('solar_zenith_angle,'+ str(features[0]) + '\n')
+        f.write('wavelength,radiances,nn_radiances\n')
+        for (i, rad) in enumerate(radiances):
+            f.write(str(wav300[i]) + ',' + str(rad) + ',' + str(nn_radiances[i]) + '\n')
+
+def test_plot300_mini(epoch, batch_idx, f_plot, wav300, r_plot, outputs, filename,
+        lr):
+    radiances = r_plot.detach().numpy()[batch_idx]
+    nn_radiances = outputs.detach().numpy()[batch_idx]
+    features = f_plot.detach().numpy()[batch_idx]
+    loss_ = msre(r_plot[batch_idx], outputs[batch_idx])*100
+    fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(7, 5))
+    ax2 = ax1.twinx()
+
+# line plot
+    line1 = ax1.plot(wav300, radiances, 'k', label='LBL RTM (True)')
+    line2 = ax1.plot(wav300, nn_radiances, 'b', label='NN RTM results')
+
+    diffcolor = 'r'
+
+
+# labels, units 
+    ax1.set_xlabel('Wavelength[nm]')
+    ax1.set_ylabel('Normalized Radiance[1/sr]')
+
+    lines, labels = ax1.get_legend_handles_labels()
+    ax1.legend(lines, labels, loc='best')
+    plt.title('Neural Network Radiance Simulator Epoch:' + str(epoch).zfill(5))
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.3, 'Surface pressure = ' + 
+    plt.text(300, -0.03, 'Surface pressure = ' + 
+            str(format(float(features[0]) * 1050, ".2f")), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.4, 'Surface albedo = ' +
+    plt.text(300, -0.02, 'Surface albedo = ' +
+            str(features[1]), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.5, 'Relative azimuth angle = ' +
+    plt.text(300, -0.01, 'Relative azimuth angle = ' +
+            str(float(features[2]) * 180), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.6, 'Viewing zenith angle = ' +
+    plt.text(300, 0, 'Viewing zenith angle = ' +
+            str(float(features[3]) * 180 / np.pi), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.7, 'Solar zenith angle =' +
+    plt.text(300, 0.01, 'Solar zenith angle =' +
+            str(float(features[4]) * 180 / np.pi), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.8, 'Batch_index =' +
+    plt.text(300, 0.02, 'Batch_index =' +
+            str(batch_idx), fontsize=16) 
+
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.2, 'MSRE = ' +
+    plt.text(320, 0.02, 'MSRE = ' +
+            str(format(loss_.item(), ".10f")), fontsize=16)
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.1, 'MSRE total = ' + str(loss))
+
+    ax2.set_ylabel('Relative Differences Ratio')
+    ax2.set_ylim([-0.01, 0.01])
+    line3 = ax2.plot(wav300, (np.exp(nn_radiances) - np.exp(radiances))/np.exp(radiances), diffcolor, 
+            linestyle='--', label='Relative Differences')
+    zeros = np.zeros((len(wav300)))
+    
+    line4 = ax2.plot(wav300, zeros, 'grey', linestyle=':')
+
+    pngfile = filename + '.png'
+    txtfile = filename + '.txt'
+    #print(pngfile)
+
+    fig.savefig(pngfile)
+    plt.close()
+
+    with open(txtfile, 'w') as f:
+        f.write('learning_rate(lr),' + str(lr) + '\n')
         f.write('surface_pressure,' + str(features[0]) + '\n')
-        #print('test_plot300 def write 02')
         f.write('surface_albedo,' + str(features[1]) + '\n')
-        #print('test_plot300 def write 03')
         f.write('relative_azimuth_angle,' + str(features[2]) + '\n')
-        #print('test_plot300 def write 04')
         f.write('viewing_zenith_angle,'+ str(features[3]) + '\n')
-        #print('test_plot300 def write 05')
         f.write('solar_zenith_angle,'+ str(features[4]) + '\n')
-        #print('test_plot300 def write 06')
+        f.write('wavelength,radiances,nn_radiances\n')
+        for (i, rad) in enumerate(radiances):
+            f.write(str(wav300[i]) + ',' + str(rad) + ',' + str(nn_radiances[i]) + '\n')
+
+def test_plot300_logradtorad(epoch, batch_idx, f_plot, wav300, r_plot, outputs, filename,
+        lr):
+    radiances = np.exp(r_plot.detach().numpy()[batch_idx])
+    nn_radiances = np.exp(outputs.detach().numpy()[batch_idx])
+    features = f_plot.detach().numpy()[batch_idx]
+    loss_ = msre(r_plot[batch_idx], outputs[batch_idx])
+    fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(7, 5))
+    ax2 = ax1.twinx()
+
+# line plot
+    line1 = ax1.plot(wav300, radiances, 'k', label='LBL RTM (True)')
+    line2 = ax1.plot(wav300, nn_radiances, 'b', label='NN RTM results')
+
+    diffcolor = 'r'
+
+
+# labels, units 
+    ax1.set_xlabel('Wavelength[nm]')
+    ax1.set_ylabel('Normalized Radiance[1/sr]')
+
+    lines, labels = ax1.get_legend_handles_labels()
+    ax1.legend(lines, labels, loc='best')
+    plt.title('Neural Network Radiance Simulator Epoch:' + str(epoch).zfill(5))
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.3, 'Surface pressure = ' + 
+    plt.text(300, -0.03, 'Surface pressure = ' + 
+            str(format(float(features[0]) * 1050, ".2f")), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.4, 'Surface albedo = ' +
+    plt.text(300, -0.02, 'Surface albedo = ' +
+            str(features[1]), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.5, 'Relative azimuth angle = ' +
+    plt.text(300, -0.01, 'Relative azimuth angle = ' +
+            str(float(features[2]) * 180), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.6, 'Viewing zenith angle = ' +
+    plt.text(300, 0, 'Viewing zenith angle = ' +
+            str(float(features[3]) * 180 / np.pi), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.7, 'Solar zenith angle =' +
+    plt.text(300, 0.01, 'Solar zenith angle =' +
+            str(float(features[4]) * 180 / np.pi), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.8, 'Batch_index =' +
+    plt.text(300, 0.02, 'Batch_index =' +
+            str(batch_idx), fontsize=16) 
+
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.2, 'MSRE = ' +
+    plt.text(320, 0.02, 'MSRE = ' +
+            str(format(loss_.item(), ".10f")), fontsize=16)
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.1, 'MSRE total = ' + str(loss))
+
+    ax2.set_ylabel('Relative Differences Ratio')
+    ax2.set_ylim([-10, 10])
+
+    line3 = ax2.plot(wav300, (nn_radiances - radiances)/radiances*100, diffcolor, 
+            linestyle='--', label='Relative Differences')
+    zeros = np.zeros((len(wav300)))
+    
+    line4 = ax2.plot(wav300, zeros, 'grey', linestyle=':')
+
+    pngfile = filename + '.png'
+    txtfile = filename + '.txt'
+    #print(pngfile)
+
+    fig.savefig(pngfile)
+    plt.close()
+
+    with open(txtfile, 'w') as f:
+        f.write('learning_rate(lr),' + str(lr) + '\n')
+        f.write('surface_pressure,' + str(features[0]) + '\n')
+        f.write('surface_albedo,' + str(features[1]) + '\n')
+        f.write('relative_azimuth_angle,' + str(features[2]) + '\n')
+        f.write('viewing_zenith_angle,'+ str(features[3]) + '\n')
+        f.write('solar_zenith_angle,'+ str(features[4]) + '\n')
+        f.write('wavelength,radiances,nn_radiances\n')
+        for (i, rad) in enumerate(radiances):
+            f.write(str(wav300[i]) + ',' + str(rad) + ',' + str(nn_radiances[i]) + '\n')
+
+def radplot_logradtorad(epoch, batch_idx, f_plot, wav, r_plot, outputs, filename,
+        lr):
+    radiances = np.exp(r_plot.detach().numpy()[batch_idx])
+    nn_radiances = np.exp(outputs.detach().numpy()[batch_idx])
+    features = f_plot.detach().numpy()[batch_idx]
+    loss_fn = nn.L1Loss()
+    loss_ = loss_fn(r_plot[batch_idx], outputs[batch_idx])
+    fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(7, 5))
+    ax2 = ax1.twinx()
+
+    x0, y0, x1, y1 = ax1.get_position().bounds
+    #print(x0, y0, x1, y1)
+    ax1.set_position([0.15, 0.12, 0.70, 0.76])
+
+# line plot
+    line1 = ax1.plot(wav, radiances, 'k', label='LBL RTM (True)')
+    line2 = ax1.plot(wav, nn_radiances, 'b', label='NN RTM results')
+
+# line plot for 0.05%
+    #y05p = np.zeros(1460) + 0.05
+    #y05m = -1 * y05p
+    #line4 = ax2.plot(wav, y05p, 'grey', linestyle = ':')
+    #line4 = ax2.plot(wav, y05m, 'grey', linestyle = ':')
+
+    diffcolor = 'r'
+
+# labels, units 
+    ax1.set_xlabel('Wavelength[nm]')
+    ax1.set_ylabel('Normalized Radiance[1/sr]')
+
+    sza_str = str(np.round(np.arccos(float(features[4])) * 180 / np.pi, 1))
+    #'V015R090A10.0%B1050hPaL300'
+    lines, labels = ax1.get_legend_handles_labels()
+    ax1.legend(lines, labels, loc='best')
+    #plt.title('Neural Network Radiance Simulator Epoch:' + str(epoch).zfill(5))
+    plt.title('S' + sza_str + 'V015R090A10.0%B1050hPaL300')
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.3, 'Surface pressure = ' + 
+    #plt.text(300, -6, 'Surface pressure = ' + 
+            #str(format(float(features[0]) * 1050, ".2f")), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.4, 'Surface albedo = ' +
+    #plt.text(300, -4, 'Surface albedo = ' +
+            #str(features[1]), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.5, 'Relative azimuth angle = ' +
+    #plt.text(300, -2, 'Relative azimuth angle = ' +
+            #str(float(features[2]) * 180), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.6, 'Viewing zenith angle = ' +
+    #plt.text(300, 0, 'Viewing zenith angle = ' +
+            #str(float(features[3]) * 180 / np.pi), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.7, 'Solar zenith angle =' +
+
+    #plt.text(300, 2, 'Solar zenith angle =' +
+            #str(np.round(np.arccos(float(features[4])) * 180 / np.pi)), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.8, 'Batch_index =' +
+    #plt.text(300, 4, 'Batch_index =' +
+            #str(batch_idx), fontsize=16) 
+
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.2, 'MSRE = ' +
+    plt.text(270, -2.5, 'MAE = ' +
+            str(format(loss_.item(), ".10f")), fontsize=16)
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.1, 'MSRE total = ' + str(loss))
+
+    ax2.set_ylabel('Relative Difference[%]')
+    ax2.set_ylim([-1, 1])
+
+    line3 = ax2.plot(wav, (nn_radiances - radiances)/radiances*100, diffcolor, 
+            linestyle='--', label='Relative Differences')
+    zeros = np.zeros((len(wav)))
+    
+    line4 = ax2.plot(wav, zeros, 'grey', linestyle=':')
+
+    pngfile = filename + '.png'
+    txtfile = filename + '.txt'
+    #print(pngfile)
+
+    fig.savefig(pngfile)
+    plt.close()
+
+    with open(txtfile, 'w') as f:
+        f.write('learning_rate(lr),' + str(lr) + '\n')
+        f.write('surface_pressure,' + str(features[0]) + '\n')
+        f.write('surface_albedo,' + str(features[1]) + '\n')
+        f.write('relative_azimuth_angle,' + str(features[2]) + '\n')
+        f.write('viewing_zenith_angle,'+ str(features[3]) + '\n')
+        f.write('solar_zenith_angle,'+ str(features[4]) + '\n')
+        f.write('wavelength,radiances,nn_radiances\n')
+        for (i, rad) in enumerate(radiances):
+            f.write(str(wav[i]) + ',' + str(rad) + ',' + str(nn_radiances[i]) + '\n')
+
+def radplot300_logradtorad(epoch, batch_idx, f_plot, wav300, r_plot, outputs, filename,
+        lr):
+    radiances = np.exp(r_plot.detach().numpy()[batch_idx])
+    nn_radiances = np.exp(outputs.detach().numpy()[batch_idx])
+    features = f_plot.detach().numpy()[batch_idx]
+    loss_fn = nn.L1Loss()
+    loss_ = loss_fn(r_plot[batch_idx], outputs[batch_idx])
+    fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(7, 5))
+    ax2 = ax1.twinx()
+
+    x0, y0, x1, y1 = ax1.get_position().bounds
+    #print(x0, y0, x1, y1)
+    ax1.set_position([0.15, 0.12, 0.70, 0.76])
+
+# line plot
+    line1 = ax1.plot(wav300, radiances, 'k', label='LBL RTM (True)')
+    line2 = ax1.plot(wav300, nn_radiances, 'b', label='NN RTM results')
+
+    diffcolor = 'r'
+
+
+# labels, units 
+    ax1.set_xlabel('Wavelength[nm]')
+    ax1.set_ylabel('Normalized Radiance[1/sr]')
+
+    sza_str = str(np.round(np.arccos(float(features[4])) * 180 / np.pi))
+    lines, labels = ax1.get_legend_handles_labels()
+    ax1.legend(lines, labels, loc='best')
+    #plt.title('Neural Network Radiance Simulator Epoch:' + str(epoch).zfill(5))
+    plt.title('S' + sza_str + 'V015R090A10.0%B1050hPaL300')
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.3, 'Surface pressure = ' + 
+    #plt.text(300, -6, 'Surface pressure = ' + 
+            #str(format(float(features[0]) * 1050, ".2f")), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.4, 'Surface albedo = ' +
+    #plt.text(300, -4, 'Surface albedo = ' +
+            #str(features[1]), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.5, 'Relative azimuth angle = ' +
+    #plt.text(300, -2, 'Relative azimuth angle = ' +
+            #str(float(features[2]) * 180), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.6, 'Viewing zenith angle = ' +
+    #plt.text(300, 0, 'Viewing zenith angle = ' +
+            #str(float(features[3]) * 180 / np.pi), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.7, 'Solar zenith angle =' +
+    #plt.text(300, 2, 'Solar zenith angle =' +
+            #str(float(features[4]) * 180 / np.pi), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.8, 'Batch_index =' +
+    #plt.text(300, 4, 'Batch_index =' +
+            #str(batch_idx), fontsize=16) 
+
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.2, 'MSRE = ' +
+    plt.text(320, -4, 'MAE = ' +
+            str(format(loss_.item(), ".10f")), fontsize=16)
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.1, 'MSRE total = ' + str(loss))
+
+    ax2.set_ylabel('Relative Differences [%]')
+    ax2.set_ylim([-10, 10])
+
+    line3 = ax2.plot(wav300, (nn_radiances - radiances)/radiances*100, diffcolor, 
+            linestyle='--', label='Relative Differences')
+    zeros = np.zeros((len(wav300)))
+    
+    line4 = ax2.plot(wav300, zeros, 'grey', linestyle=':')
+
+    pngfile = filename + '.png'
+    txtfile = filename + '.txt'
+    #print(pngfile)
+
+    fig.savefig(pngfile)
+    #plt.show()
+    #quit()
+    plt.close()
+
+    with open(txtfile, 'w') as f:
+        f.write('learning_rate(lr),' + str(lr) + '\n')
+        f.write('surface_pressure,' + str(features[0]) + '\n')
+        f.write('surface_albedo,' + str(features[1]) + '\n')
+        f.write('relative_azimuth_angle,' + str(features[2]) + '\n')
+        f.write('viewing_zenith_angle,'+ str(features[3]) + '\n')
+        f.write('solar_zenith_angle,'+ str(features[4]) + '\n')
+        f.write('wavelength,radiances,nn_radiances\n')
+        for (i, rad) in enumerate(radiances):
+            f.write(str(wav300[i]) + ',' + str(rad) + ',' + str(nn_radiances[i]) + '\n')
+
+def test_plot300(epoch, batch_idx, f_plot, wav300, r_plot, outputs, filename,
+        lr):
+    radiances = r_plot.detach().numpy()[batch_idx]
+    nn_radiances = outputs.detach().numpy()[batch_idx]
+    features = f_plot.detach().numpy()[batch_idx]
+    loss_ = msre(r_plot[batch_idx], outputs[batch_idx])
+    fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(7, 5))
+    ax2 = ax1.twinx()
+
+# line plot
+    line1 = ax1.plot(wav300, radiances, 'k', label='LBL RTM (True)')
+    line2 = ax1.plot(wav300, nn_radiances, 'b', label='NN RTM results')
+
+    diffcolor = 'r'
+
+
+# labels, units 
+    ax1.set_xlabel('Wavelength[nm]')
+    ax1.set_ylabel('Normalized Radiance[1/sr]')
+
+    lines, labels = ax1.get_legend_handles_labels()
+    ax1.legend(lines, labels, loc='best')
+    plt.title('Neural Network Radiance Simulator Epoch:' + str(epoch).zfill(5))
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.3, 'Surface pressure = ' + 
+    plt.text(300, -0.03, 'Surface pressure = ' + 
+            str(format(float(features[0]) * 1050, ".2f")), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.4, 'Surface albedo = ' +
+    plt.text(300, -0.02, 'Surface albedo = ' +
+            str(features[1]), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.5, 'Relative azimuth angle = ' +
+    plt.text(300, -0.01, 'Relative azimuth angle = ' +
+            str(float(features[2]) * 180), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.6, 'Viewing zenith angle = ' +
+    plt.text(300, 0, 'Viewing zenith angle = ' +
+            str(float(features[3]) * 180 / np.pi), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.7, 'Solar zenith angle =' +
+    plt.text(300, 0.01, 'Solar zenith angle =' +
+            str(float(features[4]) * 180 / np.pi), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.8, 'Batch_index =' +
+    plt.text(300, 0.02, 'Batch_index =' +
+            str(batch_idx), fontsize=16) 
+
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.2, 'MSRE = ' +
+    plt.text(320, 0.02, 'MSRE = ' +
+            str(format(loss_.item(), ".10f")), fontsize=16)
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.1, 'MSRE total = ' + str(loss))
+
+    ax2.set_ylabel('Relative Differences Ratio')
+    ax2.set_ylim([-10, 10])
+
+    line3 = ax2.plot(wav300, (nn_radiances - radiances)/radiances*100, diffcolor, 
+            linestyle='--', label='Relative Differences')
+    zeros = np.zeros((len(wav300)))
+    
+    line4 = ax2.plot(wav300, zeros, 'grey', linestyle=':')
+
+    pngfile = filename + '.png'
+    txtfile = filename + '.txt'
+    #print(pngfile)
+
+    fig.savefig(pngfile)
+    plt.close()
+
+    with open(txtfile, 'w') as f:
+        f.write('learning_rate(lr),' + str(lr) + '\n')
+        f.write('surface_pressure,' + str(features[0]) + '\n')
+        f.write('surface_albedo,' + str(features[1]) + '\n')
+        f.write('relative_azimuth_angle,' + str(features[2]) + '\n')
+        f.write('viewing_zenith_angle,'+ str(features[3]) + '\n')
+        f.write('solar_zenith_angle,'+ str(features[4]) + '\n')
         f.write('wavelength,radiances,nn_radiances\n')
         for (i, rad) in enumerate(radiances):
             f.write(str(wav300[i]) + ',' + str(rad) + ',' + str(nn_radiances[i]) + '\n')
@@ -809,11 +1522,6 @@ def input_custom_normalize(pre_list, alb_list, raa_list, vza_list, sza_list,
     return (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array)
 
 
-def rad_custom_normalize(rad):
-    rad_array = np.log(rad)
-    return rad_array
-
-
 
 def wav_custom_normalize(wav_list):
     wav_array = np.array(wav_list)/340
@@ -834,7 +1542,7 @@ def XY_data_loader_toz_800_test(pre_list, alb_list, raa_list, vza_list, sza_list
 
 
 
-    #rad_array = rad_custom_normalize(rad)
+    #rad_array = np.log(rad)
     rad_array = np.array(rad)
 
     X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
@@ -880,7 +1588,7 @@ def XY_data_loader_toz_800_test_radlog(pre_list, alb_list, raa_list, vza_list, s
 
 
 
-    rad_array = rad_custom_normalize(rad)
+    rad_array = np.log(rad)
 
     X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
     #print(toz_list)
@@ -916,7 +1624,7 @@ def XY_data_loader_toz_800_train_radlog(pre_list, alb_list, raa_list, vza_list, 
             ) = input_custom_normalize(pre_list, alb_list, 
                     raa_list, vza_list, sza_list, toz_list)
 
-    rad_array = rad_custom_normalize(rad)
+    rad_array = np.log(rad)
 
     X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
     #print(toz_list)
@@ -953,7 +1661,7 @@ def XY_data_loader_toz_800_v2_sza_all(pre_list, alb_list, raa_list, vza_list, sz
             ) = input_custom_normalize(pre_list, alb_list, 
                     raa_list, vza_list, sza_list, toz_list)
 
-    rad_array = rad_custom_normalize(rad)
+    rad_array = np.log(rad)
 
     X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
     X = DataFrame({
@@ -979,8 +1687,120 @@ def XY_data_loader_toz_800_v3_sza_train(pre_list, alb_list, raa_list, vza_list, 
             ) = input_custom_normalize(pre_list, alb_list, 
                     raa_list, vza_list, sza_list, toz_list)
 
-    #rad_array = rad_custom_normalize(rad)
+    #rad_array = np.log(rad)
     rad_array = rad
+
+    X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
+    X = DataFrame({
+        'pre':pre_array,
+        'alb':alb_array,
+        'raa':raa_array,
+        'vza':vza_array,
+        'sza':sza_array,
+        'toz':toz_array})#, 'wav':wav_list}))
+
+    rad_ = rad_array.reshape((12*1*1*1*1, 1460))
+    rad_ = rad_[:, 660:]
+    Y = DataFrame(rad_)
+
+    train_dataset = RTM(X=X, y=Y, transform=None)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=128, shuffle=True)
+    return train_loader
+
+def XY_data_loader_toz_800_v2_sza_train_01(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
+        rad, albwf, o3wf):
+
+    (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
+            ) = input_custom_normalize(pre_list, alb_list, 
+                    raa_list, vza_list, sza_list, toz_list)
+
+    #rad_array = np.log(rad)
+    rad_array = rad
+
+    #X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
+    X = DataFrame({
+        #'pre':pre_array,
+        #'alb':alb_array,
+        #'raa':raa_array,
+        #'vza':vza_array,
+        'sza':sza_array})#,
+        #'toz':toz_array})#, 'wav':wav_list}))
+
+    rad_ = rad_array.reshape((12*1*1*1*1, 1460))
+    rad_ = rad_[:, 660:]
+    Y = DataFrame(rad_)
+
+    train_dataset = RTM(X=X, y=Y, transform=None)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=128, shuffle=True)
+    return train_loader
+
+def XY_data_loader_toz_800_v2_sza_train_radlog_mini(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
+        rad, albwf, o3wf):
+
+    prelen = len(pre_list)
+
+    (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
+            ) = input_custom_normalize(pre_list, alb_list, 
+                    raa_list, vza_list, sza_list, toz_list)
+
+    rad_array = np.log(rad)
+    #rad_array = rad
+
+    X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
+    X = DataFrame({
+        'pre':pre_array,
+        'alb':alb_array,
+        'raa':raa_array,
+        'vza':vza_array,
+        'sza':sza_array,
+        'toz':toz_array})#, 'wav':wav_list}))
+
+    rad_ = rad_array.reshape((prelen, 1460))
+    rad_ = rad_[:, 1260:]
+    Y = DataFrame(rad_)
+
+    train_dataset = RTM(X=X, y=Y, transform=None)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=128, shuffle=True)
+    return train_loader
+
+def XY_data_loader_toz_v3_sza_radlog(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
+        rad, albwf, o3wf):
+
+    (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
+            ) = input_custom_normalize(pre_list, alb_list, 
+                    raa_list, vza_list, sza_list, toz_list)
+
+    prelen = len(pre_list)
+
+    rad_array = np.log(rad)
+    #rad_array = rad
+
+    X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
+    X = DataFrame({
+        'pre':pre_array,
+        'alb':alb_array,
+        'raa':raa_array,
+        'vza':vza_array,
+        'sza':sza_array,
+        'toz':toz_array})#, 'wav':wav_list}))
+
+    rad_ = rad_array.reshape((prelen, 1460))
+    #rad_ = rad_[:, 660:]
+    Y = DataFrame(rad_)
+
+    train_dataset = RTM(X=X, y=Y, transform=None)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=128, shuffle=True)
+    return train_loader
+
+def XY_data_loader_toz_800_v2_sza_train_radlog(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
+        rad, albwf, o3wf):
+
+    (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
+            ) = input_custom_normalize(pre_list, alb_list, 
+                    raa_list, vza_list, sza_list, toz_list)
+
+    rad_array = np.log(rad)
+    #rad_array = rad
 
     X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
     X = DataFrame({
@@ -1006,7 +1826,8 @@ def XY_data_loader_toz_800_v2_sza_train(pre_list, alb_list, raa_list, vza_list, 
             ) = input_custom_normalize(pre_list, alb_list, 
                     raa_list, vza_list, sza_list, toz_list)
 
-    rad_array = rad_custom_normalize(rad)
+    #rad_array = np.log(rad)
+    rad_array = rad
 
     X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
     X = DataFrame({
@@ -1032,7 +1853,7 @@ def XY_data_loader_toz_800_v3_sza_test(pre_list, alb_list, raa_list, vza_list, s
             ) = input_custom_normalize(pre_list, alb_list, 
                     raa_list, vza_list, sza_list, toz_list)
 
-    #rad_array = rad_custom_normalize(rad)
+    #rad_array = np.log(rad)
     rad_array = rad
 
     X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
@@ -1052,6 +1873,114 @@ def XY_data_loader_toz_800_v3_sza_test(pre_list, alb_list, raa_list, vza_list, s
     test_loader = DataLoader(dataset=test_dataset, batch_size=128, shuffle=False)
     return test_loader
 
+def XY_data_loader_toz_800_v2_sza_test_01(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
+        rad, albwf, o3wf):
+
+    (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
+            ) = input_custom_normalize(pre_list, alb_list, 
+                    raa_list, vza_list, sza_list, toz_list)
+
+    #rad_array = np.log(rad)
+    rad_array = rad
+
+    #X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
+    X = DataFrame({
+        #'pre':pre_array,
+        #'alb':alb_array,
+        #'raa':raa_array,
+        #'vza':vza_array,
+        'sza':sza_array})#,
+        #'toz':toz_array})#, 'wav':wav_list}))
+
+    rad_ = rad_array.reshape((81*1*1*1*1, 1460))
+    rad_ = rad_[:, 660:]
+    Y = DataFrame(rad_)
+
+    test_dataset = RTM(X=X, y=Y, transform=None)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=128, shuffle=False)
+    return test_loader
+
+def XY_data_loader_toz_800_v2_sza_test_radlog_mini(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
+        rad, albwf, o3wf):
+
+    prelen = len(pre_list)
+
+    (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
+            ) = input_custom_normalize(pre_list, alb_list, 
+                    raa_list, vza_list, sza_list, toz_list)
+
+    rad_array = np.log(rad)
+    #rad_array = rad
+
+    X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
+    X = DataFrame({
+        'pre':pre_array,
+        'alb':alb_array,
+        'raa':raa_array,
+        'vza':vza_array,
+        'sza':sza_array,
+        'toz':toz_array})#, 'wav':wav_list}))
+
+    rad_ = rad_array.reshape((prelen, 1460))
+    rad_ = rad_[:, 1260:]
+    Y = DataFrame(rad_)
+
+    test_dataset = RTM(X=X, y=Y, transform=None)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=128, shuffle=False)
+    return test_loader
+def XY_data_loader_toz_v3_sza_test_radlog(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
+        rad, albwf, o3wf):
+
+    (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
+            ) = input_custom_normalize(pre_list, alb_list, 
+                    raa_list, vza_list, sza_list, toz_list)
+
+    rad_array = np.log(rad)
+    #rad_array = rad
+
+    X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
+    X = DataFrame({
+        'pre':pre_array,
+        'alb':alb_array,
+        'raa':raa_array,
+        'vza':vza_array,
+        'sza':sza_array,
+        'toz':toz_array})#, 'wav':wav_list}))
+
+    rad_ = rad_array.reshape((81*1*1*1*1, 1460))
+    #rad_ = rad_[:, 660:]
+    Y = DataFrame(rad_)
+
+    test_dataset = RTM(X=X, y=Y, transform=None)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=128, shuffle=False)
+    return test_loader
+
+def XY_data_loader_toz_800_v2_sza_test_radlog(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
+        rad, albwf, o3wf):
+
+    (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
+            ) = input_custom_normalize(pre_list, alb_list, 
+                    raa_list, vza_list, sza_list, toz_list)
+
+    rad_array = np.log(rad)
+    #rad_array = rad
+
+    X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
+    X = DataFrame({
+        'pre':pre_array,
+        'alb':alb_array,
+        'raa':raa_array,
+        'vza':vza_array,
+        'sza':sza_array,
+        'toz':toz_array})#, 'wav':wav_list}))
+
+    rad_ = rad_array.reshape((81*1*1*1*1, 1460))
+    rad_ = rad_[:, 660:]
+    Y = DataFrame(rad_)
+
+    test_dataset = RTM(X=X, y=Y, transform=None)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=128, shuffle=False)
+    return test_loader
 def XY_data_loader_toz_800_v2_sza_test(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
         rad, albwf, o3wf):
 
@@ -1059,7 +1988,8 @@ def XY_data_loader_toz_800_v2_sza_test(pre_list, alb_list, raa_list, vza_list, s
             ) = input_custom_normalize(pre_list, alb_list, 
                     raa_list, vza_list, sza_list, toz_list)
 
-    rad_array = rad_custom_normalize(rad)
+    #rad_array = np.log(rad)
+    rad_array = rad
 
     X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
     X = DataFrame({
@@ -1086,7 +2016,7 @@ def XY_data_loader_single_wav_train(pre_list, alb_list, raa_list, vza_list,
             wav_array, rad_array) = input_custom_normalize(pre_list, alb_list, 
                     raa_list, vza_list, sza_list, toz_list)
     wav_array = wav_custom_normalize(wav_list)
-    rad_array = rad_custom_normalize(rad) 
+    rad_array = np.log(rad) 
 
 
     X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})

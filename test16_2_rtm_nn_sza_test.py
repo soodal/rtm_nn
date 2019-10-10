@@ -90,7 +90,7 @@ from ds_rtm_nn import wav_custom_normalize
 if __name__ == '__main__':
 # set up the neural network
 
-    projectname = '16_1'
+    projectname = '16_2'
     
     states_path = './states/project_' + projectname
     plot_path = './plot/project_' + projectname
@@ -104,15 +104,15 @@ if __name__ == '__main__':
 
     model = MLPv03()
     print(model)
-    lr = 0.00001
+    lr = 0.001
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
 #loss_fn = nn.CrossEntropyLoss()
     #loss_fn = nn.MSELoss()
 
-    #mean_train_losses = []
-    #mean_valid_losses = []
-    #mean_test_losses = []
+    mean_train_losses = []
+    mean_valid_losses = []
+    mean_test_losses = []
     valid_acc_list = []
 
     epochs = 1000
@@ -182,23 +182,26 @@ if __name__ == '__main__':
         wav_num = len(wav)
         wav_list = list(wav)
 
-        sza_train_idx = np.array([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20,
-            22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 
-            52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80,
-            82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 
-            102, 104, 106, 108, 110, 112, 114, 116, 118, 120,
-            122, 124, 126, 128, 130, 132, 134, 136, 138, 140,
-            142, 144, 146, 148, 150, 152, 154, 156, 158, 160,
-            162, 164, 166, 168, 170, 172, 174, 176, 178], dtype=np.int)
+        sza_train_idx = np.array([2, 6, 10, 14, 18, 22,
+            26, 30, 34, 38, 42, 46, 50,  
+            54, 58, 62, 66, 70, 74, 78, 82,
+            86, 90, 94, 98, 102, 
+            106, 110, 114, 118, 122,
+            126, 130, 134, 138, 142,
+            146, 150, 154, 158, 162,
+            166, 170, 174, 178], dtype=np.int)
 
-        sza_test_idx = np.array([1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21,
-            23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 
-            53, 55, 57, 59, 61, 63, 65, 67, 69, 71, 73, 75, 77, 79, 81,
-            83, 85, 87, 89, 91, 93, 95, 97, 99, 101, 
-            103, 105, 107, 109, 111, 113, 115, 117, 119, 121,
-            123, 125, 127, 129, 131, 133, 135, 137, 139, 141,
-            143, 145, 147, 149, 151, 153, 155, 157, 159, 161,
-            163, 165, 167, 169, 171, 173, 175, 177], dtype=np.int)
+        sza_test_idx = np.array([0, 1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 16, 17, 19, 20,
+            21, 23, 24, 25, 27, 28, 29, 31, 32, 33, 35, 36, 37, 39, 40, 41, 43, 44, 45, 47, 48, 49,51, 
+            52, 53, 55, 56, 57, 59, 60, 61, 63, 64, 65, 67, 68, 69, 71, 72, 73,
+            75, 76, 77, 79, 80, 81, 
+            83, 84, 85, 87, 88, 89, 91, 92, 93, 95, 96, 97, 99, 100, 
+            101, 103, 104, 105, 107, 108, 109, 111, 112, 113, 115, 116, 117, 119, 120,
+            121, 123, 124, 125, 127, 128, 129, 131, 132, 133, 135, 136, 137, 139, 140,
+            141, 143, 144, 145, 147, 148, 149, 151, 152, 153, 155, 156, 157, 159, 160,
+            161, 163, 164, 165, 167, 168, 169, 171, 172, 173, 175, 176, 177], dtype=np.int)
+        #print(sza[sza_train_idx], len(sza[sza_train_idx]))
+        #print(sza[sza_test_idx], len(sza[sza_test_idx]))
 
         (pre_list_train, alb_list_train, raa_list_train, vza_list_train,
                 sza_list_train, toz_list_train) = features_maker_toz(
@@ -242,12 +245,9 @@ if __name__ == '__main__':
             loss = msre(outputs, radiances)
             loss.backward()
             optimizer.step()
-            #train_losses = np.append(train_losses, loss.item())
-            train_losses = np.append(train_losses, float(loss))
-            #print(loss)
-            #print(type(loss.item()),type(loss.item()))
-            #print(type(float(loss)),type(float(loss)))
-
+            #train_losses.append(loss.item())
+            train_losses = np.append(train_losses, loss.item())
+            #train_losses.append(loss.data)
             #if real_epoch == 0:
 
             # each batch is 128, print this for one of 10 batches
@@ -257,7 +257,7 @@ if __name__ == '__main__':
                 print(loss.item())
                 timestamp = time.time()
 
-            if epoch_local % 100 == 0:
+            if epoch_local % 1000 == 0:
                 for inbatch in range(features.detach().numpy().shape[0]):
                     #print(i, outputs)
                     filename = ('./plot/project_' + projectname + 
@@ -280,10 +280,9 @@ if __name__ == '__main__':
                 outputs = model(features)
                 loss = msre(outputs, radiances)
                 
-                #test_losses = np.append(test_losses, loss.item())
-                test_losses = np.append(test_losses, float(loss))
+                test_losses = np.append(test_losses, loss.item())
                
-                if epoch_local % 100 == 0:
+                if epoch_local % 1000 == 0:
                     for inbatch in range(features.detach().numpy().shape[0]):
                         filename = ('./plot/project_' + projectname + 
                                 '/' + projectname + 
@@ -301,9 +300,9 @@ if __name__ == '__main__':
         #read_count += 1
 
         #if read_lut_list == LUT_filelist:
-        #mean_train_losses.append(np.mean(train_losses))
+        mean_train_losses.append(np.mean(train_losses))
         #mean_valid_losses.append(np.mean(valid_losses))
-        #mean_test_losses.append(np.mean(test_losses))
+        mean_test_losses.append(np.mean(test_losses))
         #print('len mean train losses ', len(mean_train_losses))
 
 
@@ -323,7 +322,7 @@ if __name__ == '__main__':
 
         torchstatefile = ('./states/project_' + projectname + '/' + 
             projectname + '_rtm_nn_sza_test_epoch_' + str(epoch_local).zfill(8) + '.pth')
-        if epoch_local % 100 == 0:
+        if epoch_local % 1000 == 0:
             torch.save({'epoch':epoch_local, 
                 'model_state_dict': model.state_dict(), 
                 'optimizer_state_dict':optimizer.state_dict(),
