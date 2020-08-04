@@ -26,14 +26,63 @@ from sklearn.model_selection import train_test_split
 #import input_test01_rtm_nn as input_params
 
 from ds_rtm_nn import RTM
-from ds_rtm_nn import MLPv02_6_800
+#from ds_rtm_nn import MLPv02_6_800
+class MLPv02_6_800(nn.Module):
+    def __init__(self):
+
+        linear1 = nn.Linear(6, 200)
+        linear2 = nn.Linear(200, 300)
+        linear3 = nn.Linear(300, 400)
+        linear4 = nn.Linear(400, 500)
+        linear5 = nn.Linear(500, 600)
+        linear6 = nn.Linear(600, 700)
+        linear7 = nn.Linear(700, 800)
+        leakyrelu = nn.LeakyReLU()
+        dropout = nn.Dropout(0.0)
+
+        nn.init.xavier_uniform_(linear1.weight)
+        nn.init.xavier_uniform_(linear2.weight)
+        nn.init.xavier_uniform_(linear3.weight)
+        nn.init.xavier_uniform_(linear4.weight)
+        nn.init.xavier_uniform_(linear5.weight)
+        nn.init.xavier_uniform_(linear6.weight)
+        nn.init.xavier_uniform_(linear7.weight)
+
+        super(MLPv02_6_800, self).__init__()
+        self.layers = nn.Sequential(
+            linear1,
+            leakyrelu,
+            dropout,
+            linear2,
+            leakyrelu,
+            dropout,
+            linear3,
+            leakyrelu,
+            dropout,
+            linear4,
+            leakyrelu,
+            dropout,
+            linear5,
+            leakyrelu,
+            dropout,
+            linear6,
+            leakyrelu,
+            dropout,
+            linear7
+        )
+        
+    def forward(self, x):
+        # convert tensor (128, 1, 28, 28) --> (128, 1*28*28)
+        x = x.view(x.size(0), -1)
+        x = self.layers(x)
+        return x
 from ds_rtm_nn import msre
 from ds_rtm_nn import test_plot300
 from ds_rtm_nn import load_LUT
 from ds_rtm_nn import features_maker_toz
 from ds_rtm_nn import XY_data_loader_toz_800_v2_sza_all
 from ds_rtm_nn import search_lat_LUT_files
-from ds_rtm_nn import rad_custom_normalize
+#from ds_rtm_nn import rad_custom_normalize
 from ds_rtm_nn import input_custom_normalize
 from ds_rtm_nn import wav_custom_normalize
 
@@ -57,10 +106,8 @@ if __name__ == '__main__':
     mean_test_losses = []
     valid_acc_list = []
 
-    epochs = 1000
-
     _epoch_list = []
-    for (path, dir, files) in os.walk('./states_10/'):
+    for (path, dir, files) in os.walk('./states/project_10/'):
         for filename in files:
             ext = os.path.splitext(filename)[-1]
 
@@ -68,30 +115,26 @@ if __name__ == '__main__':
                 _epoch = filename[-12:-4]
                 _epoch_list.append(_epoch)
 
-    
-
+    load_epoch = 251500
     if len(files) >= 1:
-        torchstatefile = './states_10/' + sorted(files)[-1]
+        if load_epoch is None:
+            torchstatefile = './states/project_' + projectname + '/' + sorted(files)[-1]
+        else:
+            torchstatefile = ('./states/project_10/10_rtm_nn_sza_test_epoch_' +
+                str(load_epoch).zfill(8) + '.pth')
         real_epoch = int(sorted(_epoch_list)[-1]) + 1
         print(real_epoch)
         #print('real_epoch = ', real_epoch)
-        if real_epoch == 100575:
-            model.load_state_dict(torch.load(torchstatefile))
-        else:
-            checkpoint = torch.load(torchstatefile)
-            model.load_state_dict(checkpoint['model_state_dict'])
-            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-            epoch_local = checkpoint['epoch']
-            loss = checkpoint['loss']
-            if real_epoch -1 !=  epoch_local:
-                quit()
+        checkpoint = torch.load(torchstatefile)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        epoch_local = checkpoint['epoch']
+        loss = checkpoint['loss']
+        if real_epoch -1 !=  epoch_local:
+            print(real_epoch, epoch_local)
 
-        #print(_epoch_list)
-        #print(sorted(_epoch_list)[-1])
     else:
         real_epoch = 0
-
-
     #for epoch in range(epochs):
     epoch = 0
     epoch_local = real_epoch + epoch
@@ -101,6 +144,7 @@ if __name__ == '__main__':
     test_losses = np.array([])
     valid_losses = np.array([])
     timestamp = time.time()
+    epoch = load_epoch
 
     #with open('./LUT/read_lut_check.txt', 'r') as f:
         #read_lut_list = f.read().splitlines()
@@ -181,60 +225,6 @@ if __name__ == '__main__':
     albwf = None
     o3wf = None
 
-    #for i, (features, radiances) in enumerate(train_loader):
-        #print(i, features.shape, radiances.shape)
-        ##if real_epoch == 0:
-        #optimizer.zero_grad()
-        #outputs = model(features)
-        #loss = msre(outputs, radiances)
-        #loss.backward()
-        #optimizer.step()
-        ##train_losses.append(loss.item())
-        #train_losses = np.append(train_losses, loss.item())
-        ##train_losses.append(loss.data)
-        ##if real_epoch == 0:
-
-        ## each bach is 128, print this for one of 10 batches
-        ##if (i * 128) % (128 * 10) == 0: 
-            ##print(f'{i * 128} / ', len(train_loader)*128, time.time() - timestamp,
-                    ##datetime.datetime.now())
-            ##print(loss.item())
-            ##timestamp = time.time()
-
-        #if epoch_local % 100 == 0:
-            #for inbatch in range(12):
-                ##print(i, outputs)
-                #filename = ('./plot/10_rtm_nn_nl24_' + lat + '_toz300_epoch_' + str(epoch_local).zfill(8) +
-                    #'_train_index_' + str(i).zfill(8) + '_inbatch_' + str(inbatch).zfill(8))
-                ## every each epoch, plot for first
-                #test_plot300(epoch_local, inbatch, features, wav300, 
-                        #radiances, outputs, filename, lr)
-                
-
-        #outputs = None
-        ##loss = None
-        ##del outputs, loss
-            
-    #model.eval()
-    #correct = 0
-    #total = 0
-
-    #with torch.no_grad():
-        #for i, (features, radiances) in enumerate(valid_loader):
-            #outputs = model(features)
-            #loss = msre(outputs, radiances)
-            
-            ##valid_losses.append(loss.item())
-            #valid_losses = np.append(valid_losses, loss.item())
-            ##valid_losses.append(loss.data)
-           
-            ##_, predicted = torch.max(outputs.data, 1)
-            ##correct += (predicted == radiances).sum().item()
-            ##total += radiances.size(0)
-            #outputs = None
-            #loss = None
-            #del outputs, loss
-
     with torch.no_grad():
         for i, (features, radiances) in enumerate(all_loader):
             outputs = model(features)
@@ -248,66 +238,61 @@ if __name__ == '__main__':
             print(i, outputs.shape)
             print(i, radiances.shape)
 
-           
-            #_, predicted = torch.max(outputs.data, 1)
-            #correct += (predicted == radiances).sum().item()
-            #total += radiances.size(0)
-            #if epoch_local % 500 == 0:
-            #for inbatch in range(len(test_loader)):
-                #filename = ('./plot/10_rtm_nn_nl24_' + lat + 
-                        #'_toz300_epoch_' + str(epoch_local).zfill(8) +
-                    #'_test_index_' + str(i).zfill(8) + '_inbatch_' + str(inbatch).zfill(8))
-                #test_plot300(epoch_local, inbatch, features, wav300, radiances,
-                        #outputs, filename, lr)
-
-
     _outputs = outputs.detach().numpy()
     _features = features.detach().numpy()
     _radiances = radiances.detach().numpy()
 
     diff = _outputs - _radiances
+    print(diff.shape)
 
-    msre_result = (np.exp(_outputs) - np.exp(_radiances))/np.exp(_radiances)
+    relative_error= (np.exp(_outputs) -
+            np.exp(_radiances))/np.exp(_radiances)*100
     
-    print(msre_result)
+    r2 = []
+    nonlog2 = []
+    for isza in range(93):
+        for iwav in range(800):
+            r1 = ((_outputs[isza, iwav] - _radiances[isza, iwav])/_radiances[isza,
+                    iwav])**2
+            r2.append(r1)
+            log1 = ((np.exp(_outputs[isza, iwav]) - np.exp(_radiances[isza,
+                iwav]))/np.exp(_radiances[isza,
+                    iwav]))**2
+            nonlog2.append(log1)
 
-
-    print(np.exp(_outputs))
-    print(_features.shape)
-    print(_features[:,4])
-    print(np.sort(_features[:,4]))
     sza = np.sort(_features[:,4])
-    print('sza', sza)
-    print(np.argsort(_features[:,4]))
     sortidx = np.argsort(_features[:,4])
-    print(_radiances[sortidx,:])
-    print(msre_result.shape)
-    print(np.array(msre_result))
-    print(np.array(wav300))
     wav = np.array(wav300)
-    _wav, _sza = np.meshgrid(wav, sza)
+    _wav, _sza = np.meshgrid(wav, np.round(np.arccos(sza)*180/np.pi, 2))
 
-# plot
+# plot1
     fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(7, 5))
     #ax2 = ax1.twinx()
 
 # contour plot
-    levels = np.arange(-0.1, 0.1, 0.01)
-    c1 = ax1.contourf(_wav, _sza, np.array(msre_result[sortidx,:]), levels,
+    levels = np.arange(-20, 20.1, 0.05)
+#TODO override contour label
+    #levels2 = np.arange(-20, 20.1, 1.)
+
+    c1 = ax1.contourf(_wav, _sza, np.array(relative_error[sortidx,:]), levels,
             cmap=plt.cm.RdBu, extend='both')
+    c2 = ax1.contour(_wav, _sza, np.array(relative_error[sortidx,:]), levels2,
+            cmap=plt.cm.RdBu)
+    #fmt = '%r %%'
+    #cl = ax1.clabel(c2, c2.levels, inline=True, fmt=fmt, fontsize=10)
 
     #line2 = ax1.plot(wav300, nn_radiances, 'b', label='NN RTM results')
 
     diffcolor = 'r'
 # labels, units 
     ax1.set_xlabel('Wavelength[nm]')
-    ax1.set_ylabel('Solar Zenith Angle')
+    ax1.set_ylabel('Solar Zenith Angle[degree]')
     cbar = fig.colorbar(c1)
 
-    #print('test_plot300 def 01')
     contours, labels = ax1.get_legend_handles_labels()
-    ax1.legend(contours, labels, loc='best')
-    plt.title('Neural Network Radiance Simulator ' + str(epoch).zfill(5))
+    #ax1.legend(contours, labels, loc='best')
+    #plt.title('V'+ vza + 'R' + 'A' + 'B' + pres + 'hPa ' + lat + toz)
+    plt.title('V015R090A10.0%B1050hPaL300')
     #plt.show()
     #plt.text(300, max(max(radiances), max(nn_radiances))*0.3, 'Surface pressure = ' + 
     #plt.text(300, -0.03, 'Surface pressure = ' + 
@@ -348,6 +333,8 @@ if __name__ == '__main__':
 
     fig.savefig(pngfile)
     plt.close()
+    
+    quit()
 
 
 # plot 2 sza, abs(rad diff)
@@ -358,7 +345,7 @@ if __name__ == '__main__':
 
     levels = np.arange(-0.1, 0.1, 0.01)
     _lambda = np.arange(0, 799, 40)
-    print(_lambda)
+    print('_lambda' ,_lambda)
 
 
     for lambda_idx in _lambda:
@@ -440,10 +427,10 @@ if __name__ == '__main__':
     #del train_losses, valid_losses
 
     torchstatefile = './states_10/10_rtm_nn_sza_test_epoch_' + str(epoch_local).zfill(8) + '.pth'
-    #if epoch_local % 100 == 0:
-        #torch.save({'epoch':epoch_local, 
-            #'model_state_dict': model.state_dict(), 
-            #'optimizer_state_dict':optimizer.state_dict(),
-            #'loss': np.mean(train_losses)}, torchstatefile)
+    if epoch_local % 100 == 0:
+        torch.save({'epoch':epoch_local, 
+            'model_state_dict': model.state_dict(), 
+            'optimizer_state_dict':optimizer.state_dict(),
+            'loss': np.mean(train_losses)}, torchstatefile)
             
     print('done')

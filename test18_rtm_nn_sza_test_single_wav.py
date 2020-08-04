@@ -37,7 +37,7 @@ class MLPv03_single_wave(nn.Module):
         linear6 = nn.Linear(200, 1)
         #linear7 = nn.Linear(1200, 1460)
         leakyrelu = nn.LeakyReLU()
-        dropout = nn.Dropout(0.3)
+        dropout = nn.Dropout(0.0)
 
         nn.init.xavier_uniform_(linear1.weight)
         nn.init.xavier_uniform_(linear2.weight)
@@ -105,7 +105,7 @@ if __name__ == '__main__':
 
     model = MLPv03_single_wave()
     print(model)
-    lr = 0.001
+    lr = 0.00001
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
 #loss_fn = nn.CrossEntropyLoss()
@@ -146,7 +146,8 @@ if __name__ == '__main__':
         epoch_total = checkpoint['epoch']
         loss = checkpoint['loss']
         if epoch_total -1 !=  epoch_total:
-            quit()
+            #quit()
+            pass
     else:
         epochs_done = 0
         epoch_total = 0
@@ -185,7 +186,8 @@ if __name__ == '__main__':
     #if not LUT_file in read_lut_list:
         (sza, vza, raa, alb, pre, wav, ps_in, zs_in, ts_in, o3_in, taudp_in, nl_in,
             rad, albwf, o3wf) = load_LUT(LUT_file)
-        timestamp = time.time()
+        #print(wav)
+        #timestamp = time.time()
 
         wav_l = list(wav)
         #wav300 = wav[660:]

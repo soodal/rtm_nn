@@ -206,7 +206,7 @@ if __name__ == '__main__':
 
         (pre_list_test, alb_list_test, raa_list_test, vza_list_test,
                 sza_list_test, toz_list_test) = features_maker_toz(
-                pre, alb, raa, vza, sza[sza_test_idx], toz)    
+                pre, alb, raa, vza, sza[sza_test_idx], toz)
     
         train_loader = XY_data_loader_toz_v3_sza_radlog(pre_list_train,
                 alb_list_train, raa_list_train, vza_list_train, sza_list_train,
@@ -221,7 +221,6 @@ if __name__ == '__main__':
                 rad[0][0][0][0][sza_test_idx][:], 
                 albwf[0][0][0][0][sza_test_idx][:], 
                 o3wf[0][0][0][0][sza_test_idx][:])
-
 
         pre_list = None
         alb_list = None
@@ -242,11 +241,7 @@ if __name__ == '__main__':
             loss = msre(outputs, radiances)
             loss.backward()
             optimizer.step()
-            #train_losses = np.append(train_losses, loss.item())
             train_losses = np.append(train_losses, float(loss))
-            #print(loss)
-            #print(type(loss.item()),type(loss.item()))
-            #print(type(float(loss)),type(float(loss)))
 
             #if real_epoch == 0:
 
@@ -294,7 +289,6 @@ if __name__ == '__main__':
                         radplot_logradtorad(epoch_local, inbatch, features, wav, radiances,
                                 outputs, filename, lr)
 
-
         #with open('./LUT/read_lut_list', 'a') as f:
             #f.write(LUT_file + '\n')
 
@@ -305,7 +299,6 @@ if __name__ == '__main__':
         #mean_valid_losses.append(np.mean(valid_losses))
         #mean_test_losses.append(np.mean(test_losses))
         #print('len mean train losses ', len(mean_train_losses))
-
 
         lossesfile = './result/' + projectname + '_rtm_nn_sza_test_mean_losses.txt' 
         #print('lossesfile')

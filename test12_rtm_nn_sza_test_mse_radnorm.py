@@ -28,7 +28,7 @@ from sklearn.model_selection import train_test_split
 from ds_rtm_nn import RTM
 from ds_rtm_nn import MLPv02_6_800
 #from ds_rtm_nn import msre
-from ds_rtm_nn import test_plot300_radlog
+from ds_rtm_nn import test_plot300
 from ds_rtm_nn import load_LUT
 from ds_rtm_nn import features_maker_toz
 from ds_rtm_nn import XY_data_loader_toz_800_v2_sza_train
@@ -248,7 +248,7 @@ if __name__ == '__main__':
                     filename = ('./plot/12_log_mse_rtm_nn_nl24_' + lat + '_toz300_epoch_' + str(epoch_local).zfill(8) +
                         '_train_index_' + str(i).zfill(8) + '_inbatch_' + str(inbatch).zfill(8))
                     # every each epoch, plot for first
-                    test_plot300_radlog(epoch_local, inbatch, features, wav300, 
+                    test_plot300(epoch_local, inbatch, features, wav300, 
                             radiances, outputs, filename, lr)
                     
 
@@ -299,7 +299,7 @@ if __name__ == '__main__':
                         filename = ('./plot/12_log_mse_rtm_nn_nl24_' + lat + 
                                 '_toz300_epoch_' + str(epoch_local).zfill(8) +
                             '_test_index_' + str(i).zfill(8) + '_inbatch_' + str(inbatch).zfill(8))
-                        test_plot300_radlog(epoch_local, inbatch, features, wav300,
+                        test_plot300(epoch_local, inbatch, features, wav300,
                             radiances, outputs, filename, lr)
 
 

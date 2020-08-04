@@ -89,7 +89,6 @@ from ds_rtm_nn import wav_custom_normalize
 
 if __name__ == '__main__':
 # set up the neural network
-
     projectname = '16_1_vec04st'
     
     states_path = './states/project_' + projectname
@@ -116,6 +115,7 @@ if __name__ == '__main__':
     valid_acc_list = []
 
     epochs = 1000
+    #load_epoch = 12500
 
     _epoch_list = []
     for (path, dir, files) in os.walk('./states/project_' + projectname + '/'):
@@ -128,24 +128,34 @@ if __name__ == '__main__':
 
 
     if len(files) >= 1:
-        torchstatefile = './states/project_' + projectname + '/' + sorted(files)[-1]
-        real_epoch = int(sorted(_epoch_list)[-1]) + 1
-        print(real_epoch)
-        #print('real_epoch = ', real_epoch)
+        if 'load_epoch' not in globals().keys():
+            torchstatefile = './states/project_' + projectname + '/' + sorted(files)[-1]
+            load_epoch = int(sorted(_epoch_list)[-1])
+        else:
+            torchstatefile = ('./states/project_' + projectname + '/' +
+                    projectname + '_rtm_nn_sza_test_epoch_' +
+                str(load_epoch).zfill(8) + '.pth')
+            print(load_epoch)
+        epoch_total = int(sorted(_epoch_list)[-1]) + 1
+        print(epoch_total)
+
         checkpoint = torch.load(torchstatefile)
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        epoch_local = checkpoint['epoch']
+        epoch_total = checkpoint['epoch']
         loss = checkpoint['loss']
-        if real_epoch -1 !=  epoch_local:
-            quit()
-
+        #if epoch_total -1 !=  epoch_total:
+            ##quit()
+            #pass
     else:
-        real_epoch = 0
+        epochs_done = 0
+        epoch_total = 0
+        if 'load_epoch' not in globals().keys():
+            load_epoch = 0
 
     for epoch in range(epochs):
-        epoch_local = real_epoch + epoch
-        print('real_epoch is ', epoch_local)
+        _epoch = load_epoch + epoch + 1
+        print('_epoch is ', _epoch)
         model.train()
         train_losses = np.array([])
         test_losses = np.array([])
@@ -160,7 +170,7 @@ if __name__ == '__main__':
 
         #for LUT_file in LUT_filelist:
 
-        print('real_epoch check' , epoch_local)
+        print('_epoch check' , _epoch)
         #print(LUT_file)
         lat = LUT_file[-23]
         #print(lat)
@@ -175,7 +185,8 @@ if __name__ == '__main__':
     #if not LUT_file in read_lut_list:
         (sza, vza, raa, alb, pre, wav, ps_in, zs_in, ts_in, o3_in, taudp_in, nl_in,
             rad, albwf, o3wf) = load_LUT(LUT_file)
-        timestamp = time.time()
+
+        #timestamp = time.time()
 
         wav_l = list(wav)
         #wav300 = wav[660:]
@@ -234,7 +245,7 @@ if __name__ == '__main__':
 
 #train_loader
         for i, (features, radiances) in enumerate(train_loader):
-            print(i, features.shape, radiances.shape)
+            #print(i, features.shape, radiances.shape)
             #if real_epoch == 0:
             optimizer.zero_grad()
             outputs = model(features)
@@ -243,8 +254,6 @@ if __name__ == '__main__':
             optimizer.step()
             train_losses = np.append(train_losses, float(loss))
 
-            #if real_epoch == 0:
-
             # each batch is 128, print this for one of 10 batches
             if (i * 128) % (128 * 10) == 0: 
                 print(f'{i * 128} / ', len(train_loader)*128, time.time() - timestamp,
@@ -252,17 +261,17 @@ if __name__ == '__main__':
                 print(loss.item())
                 timestamp = time.time()
 
-            if epoch_local % 100 == 0:
+            if _epoch % 100 == 0:
                 for inbatch in range(features.detach().numpy().shape[0]):
                     #print(i, outputs)
                     filename = ('./plot/project_' + projectname + 
                             '/' + projectname + 
                             '_rtm_nn_nl24_' + lat + 
-                            '_toz300_epoch_' + str(epoch_local).zfill(8) + 
+                            '_toz300_epoch_' + str(_epoch).zfill(8) + 
                             '_train_index_' + str(i).zfill(8) + 
                             '_inbatch_' + str(inbatch).zfill(8))
                     # every each epoch, plot for first
-                    radplot_logradtorad(epoch_local, inbatch, features, wav, 
+                    radplot_logradtorad(_epoch, inbatch, features, wav, 
                             radiances, outputs, filename, lr)
                     
         model.eval()
@@ -278,15 +287,15 @@ if __name__ == '__main__':
                 #test_losses = np.append(test_losses, loss.item())
                 test_losses = np.append(test_losses, float(loss))
                
-                if epoch_local % 100 == 0:
+                if _epoch % 100 == 0:
                     for inbatch in range(features.detach().numpy().shape[0]):
                         filename = ('./plot/project_' + projectname + 
                                 '/' + projectname + 
                                 '_rtm_nn_nl24_' + lat + 
-                                '_toz300_epoch_' + str(epoch_local).zfill(8) +
+                                '_toz300_epoch_' + str(_epoch).zfill(8) +
                                 '_test_index_' + str(i).zfill(8) + 
                                 '_inbatch_' + str(inbatch).zfill(8))
-                        radplot_logradtorad(epoch_local, inbatch, features, wav, radiances,
+                        radplot_logradtorad(_epoch, inbatch, features, wav, radiances,
                                 outputs, filename, lr)
 
         #with open('./LUT/read_lut_list', 'a') as f:
@@ -304,20 +313,20 @@ if __name__ == '__main__':
         #print('lossesfile')
         if os.path.exists(lossesfile):
             with open(lossesfile, 'a') as f:
-                f.write(str(epoch_local).zfill(8) + ',' + str(np.mean(train_losses))
+                f.write(str(_epoch).zfill(8) + ',' + str(np.mean(train_losses))
                         + ',' + str(np.mean(test_losses)) + '\n')
         else:
             with open(lossesfile, 'w') as f:
                 f.write('index,mean_train_losses,mean_valid_losses'+'\n')
-                f.write(str(epoch_local).zfill(8) + ',' + str(np.mean(train_losses))
+                f.write(str(_epoch).zfill(8) + ',' + str(np.mean(train_losses))
                         + ',' + str(np.mean(test_losses))  + '\n')
 
 
 
         torchstatefile = ('./states/project_' + projectname + '/' + 
-            projectname + '_rtm_nn_sza_test_epoch_' + str(epoch_local).zfill(8) + '.pth')
-        if epoch_local % 100 == 0:
-            torch.save({'epoch':epoch_local, 
+            projectname + '_rtm_nn_sza_test_epoch_' + str(_epoch).zfill(8) + '.pth')
+        if _epoch % 100 == 0:
+            torch.save({'epoch':_epoch, 
                 'model_state_dict': model.state_dict(), 
                 'optimizer_state_dict':optimizer.state_dict(),
                 'loss': np.mean(train_losses)}, torchstatefile)

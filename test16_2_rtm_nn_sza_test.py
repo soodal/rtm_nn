@@ -245,10 +245,7 @@ if __name__ == '__main__':
             loss = msre(outputs, radiances)
             loss.backward()
             optimizer.step()
-            #train_losses.append(loss.item())
             train_losses = np.append(train_losses, loss.item())
-            #train_losses.append(loss.data)
-            #if real_epoch == 0:
 
             # each batch is 128, print this for one of 10 batches
             if (i * 128) % (128 * 10) == 0: 
@@ -281,6 +278,7 @@ if __name__ == '__main__':
                 loss = msre(outputs, radiances)
                 
                 test_losses = np.append(test_losses, loss.item())
+                test_losses = np.append(test_losses, float(loss))
                
                 if epoch_local % 1000 == 0:
                     for inbatch in range(features.detach().numpy().shape[0]):
@@ -300,9 +298,9 @@ if __name__ == '__main__':
         #read_count += 1
 
         #if read_lut_list == LUT_filelist:
-        mean_train_losses.append(np.mean(train_losses))
+        #mean_train_losses.append(np.mean(train_losses))
         #mean_valid_losses.append(np.mean(valid_losses))
-        mean_test_losses.append(np.mean(test_losses))
+        #mean_test_losses.append(np.mean(test_losses))
         #print('len mean train losses ', len(mean_train_losses))
 
 

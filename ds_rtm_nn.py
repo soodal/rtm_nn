@@ -5,8 +5,8 @@ import os
 import time
 import itertools
 import datetime
-from IPython.display import Image
-from IPython import display
+# from IPython.display import Image
+# from IPython import display
 import matplotlib.pyplot as plt
 
 import torch 
@@ -15,8 +15,8 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 import torch.optim as optim
-from torchvision import datasets
-from torchvision import transforms
+# from torchvision import datasets
+# from torchvision import transforms
 
 import netCDF4
 import numpy as np
@@ -909,13 +909,17 @@ def test_plot300_logradtorad(epoch, batch_idx, f_plot, wav300, r_plot, outputs, 
         for (i, rad) in enumerate(radiances):
             f.write(str(wav300[i]) + ',' + str(rad) + ',' + str(nn_radiances[i]) + '\n')
 
-def radplot_logradtorad(epoch, batch_idx, f_plot, wav, r_plot, outputs, filename,
+def radplot_logradtorad_detached(epoch, batch_idx, f_plot, wav, r_plot, outputs, filename,
         lr):
-    radiances = np.exp(r_plot.detach().numpy()[batch_idx])
-    nn_radiances = np.exp(outputs.detach().numpy()[batch_idx])
-    features = f_plot.detach().numpy()[batch_idx]
-    loss_fn = nn.L1Loss()
-    loss_ = loss_fn(r_plot[batch_idx], outputs[batch_idx])
+    radiances = np.exp(r_plot[batch_idx,:])
+    nn_radiances = np.exp(outputs[batch_idx,:])
+    features = f_plot.detach().numpy()[batch_idx,:]
+    #loss_fn = nn.L1Loss()
+    print(r_plot[batch_idx,:].shape)
+    print(r_plot[batch_idx, :].shape)
+    print(outputs[batch_idx, :].shape)
+
+    #loss_ = loss_fn(r_plot[batch_idx], outputs[batch_idx])
     fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(7, 5))
     ax2 = ax1.twinx()
 
@@ -966,8 +970,8 @@ def radplot_logradtorad(epoch, batch_idx, f_plot, wav, r_plot, outputs, filename
             #str(batch_idx), fontsize=16) 
 
     #plt.text(320, max(max(radiances), max(nn_radiances))*0.2, 'MSRE = ' +
-    plt.text(270, -2.5, 'MAE = ' +
-            str(format(loss_.item(), ".10f")), fontsize=16)
+    #plt.text(270, -2.5, 'MAE = ' +
+            #str(format(loss_.item(), ".10f")), fontsize=16)
     #plt.text(320, max(max(radiances), max(nn_radiances))*0.1, 'MSRE total = ' + str(loss))
 
     ax2.set_ylabel('Relative Difference[%]')
@@ -978,6 +982,102 @@ def radplot_logradtorad(epoch, batch_idx, f_plot, wav, r_plot, outputs, filename
     zeros = np.zeros((len(wav)))
     
     line4 = ax2.plot(wav, zeros, 'grey', linestyle=':')
+
+    pngfile = filename + '.png'
+    txtfile = filename + '.txt'
+    #print(pngfile)
+
+    fig.savefig(pngfile)
+    plt.close()
+
+    with open(txtfile, 'w') as f:
+        f.write('learning_rate(lr),' + str(lr) + '\n')
+        f.write('surface_pressure,' + str(features[0]) + '\n')
+        f.write('surface_albedo,' + str(features[1]) + '\n')
+        f.write('relative_azimuth_angle,' + str(features[2]) + '\n')
+        f.write('viewing_zenith_angle,'+ str(features[3]) + '\n')
+        f.write('solar_zenith_angle,'+ str(features[4]) + '\n')
+        f.write('wavelength,radiances,nn_radiances\n')
+        for (i, rad) in enumerate(radiances):
+            f.write(str(wav[i]) + ',' + str(rad) + ',' + str(nn_radiances[i]) + '\n')
+
+def radplot_logradtorad(epoch, batch_idx, f_plot, wav, r_plot, outputs, filename,
+        lr):
+    radiances = np.exp(r_plot.detach().numpy()[batch_idx])
+    nn_radiances = np.exp(outputs.detach().numpy()[batch_idx])
+    features = f_plot.detach().numpy()[batch_idx]
+    loss_fn = nn.L1Loss()
+    loss_ = loss_fn(r_plot[batch_idx], outputs[batch_idx])
+    fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(7*5, 5*5))
+    ax2 = ax1.twinx()
+
+    x0, y0, x1, y1 = ax1.get_position().bounds
+    #print(x0, y0, x1, y1)
+    ax1.set_position([0.15, 0.12, 0.70, 0.76])
+
+# line plot
+    line1 = ax1.plot(wav, radiances, 'k', linestyle='solid', 
+                    label='LBL RTM (True)', linewidth=1*2)
+    line2 = ax1.plot(wav, nn_radiances, 'b', linestyle='dashed', 
+                    label='NN RTM results', linewidth=1*5)
+
+# line plot for 0.05%
+    #y05p = np.zeros(1460) + 0.05
+    #y05m = -1 * y05p
+    #line4 = ax2.plot(wav, y05p, 'grey', linestyle = ':')
+    #line4 = ax2.plot(wav, y05m, 'grey', linestyle = ':')
+
+    diffcolor = 'r'
+
+# labels, units 
+    ax1.set_xlabel('Wavelength[nm]', fontsize=14*5)
+    ax1.set_ylabel('Normalized Radiance[1/sr]', fontsize=14*5)
+
+    sza_str = str(np.round(np.arccos(float(features[4])) * 180 / np.pi, 1))
+    #'V015R090A10.0%B1050hPaL300'
+    lines, labels = ax1.get_legend_handles_labels()
+    ax1.legend(lines, labels, loc='best', fontsize=12*5)
+    ax1.tick_params(which='major', labelsize=10*5)
+    #plt.title('Neural Network Radiance Simulator Epoch:' + str(epoch).zfill(5))
+    plt.title('S' + sza_str + 'V015R090A10.0%B1050hPaL300', fontsize=16*5)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.3, 'Surface pressure = ' + 
+    #plt.text(300, -6, 'Surface pressure = ' + 
+            #str(format(float(features[0]) * 1050, ".2f")), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.4, 'Surface albedo = ' +
+    #plt.text(300, -4, 'Surface albedo = ' +
+            #str(features[1]), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.5, 'Relative azimuth angle = ' +
+    #plt.text(300, -2, 'Relative azimuth angle = ' +
+            #str(float(features[2]) * 180), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.6, 'Viewing zenith angle = ' +
+    #plt.text(300, 0, 'Viewing zenith angle = ' +
+            #str(float(features[3]) * 180 / np.pi), fontsize=16) 
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.7, 'Solar zenith angle =' +
+
+    #plt.text(300, 2, 'Solar zenith angle =' +
+            #str(np.round(np.arccos(float(features[4])) * 180 / np.pi)), fontsize=16)
+    #plt.text(300, max(max(radiances), max(nn_radiances))*0.8, 'Batch_index =' +
+    #plt.text(300, 4, 'Batch_index =' +
+            #str(batch_idx), fontsize=16) 
+
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.2, 'MSRE = ' +
+    plt.text(270, -2.5, 'MAE = ' +
+            str(format(loss_.item(), ".10f")), fontsize=16)
+    #plt.text(320, max(max(radiances), max(nn_radiances))*0.1, 'MSRE total = ' + str(loss))
+
+    ax2.set_ylabel('Relative Difference[%]', color='red', fontsize=14*5)
+    ax2.set_ylim([-1, 1])
+    ax2.set_yticklabels([-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1], fontsize=14*5)
+    ax2.tick_params(axis='y', labelcolor='red')
+
+    line3 = ax2.plot(wav, (nn_radiances - radiances)/radiances*100, diffcolor, 
+            linestyle='--', linewidth=1*5, label='Relative Differences')
+
+    zeros = np.zeros((len(wav)))
+    
+    line4 = ax2.plot(wav, zeros, 'grey', linestyle=':', linewidth=2)
+
+    #ax2.spines["right"].set_edgecolor(line3.get_color())
 
     pngfile = filename + '.png'
     txtfile = filename + '.txt'
@@ -1527,6 +1627,10 @@ def wav_custom_normalize(wav_list):
     wav_array = np.array(wav_list)/340
     return wav_array
 
+def wav_custom_normalize_v2(wav_list):
+    wav_array = (np.array(wav_list)-270)/340
+    return wav_array
+
 def XY_data_loader_toz_800_test(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
         rad, albwf, o3wf):
 
@@ -1763,9 +1867,61 @@ def XY_data_loader_toz_800_v2_sza_train_radlog_mini(pre_list, alb_list, raa_list
     train_loader = DataLoader(dataset=train_dataset, batch_size=128, shuffle=True)
     return train_loader
 
-def XY_data_loader_toz_v3_sza_radlog(pre_list, alb_list, raa_list, vza_list, sza_list, toz_list, 
-        rad, albwf, o3wf):
+def XY_data_loader_toz_v3_sza_rad_standard(pre_list, alb_list, raa_list, 
+        vza_list, sza_list, toz_list, rad, albwf, o3wf):
 
+    (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
+            ) = input_custom_normalize(pre_list, alb_list, 
+                    raa_list, vza_list, sza_list, toz_list)
+
+    prelen = len(pre_list)
+
+    #rad_array = np.log(rad)
+    rad_array = np.array(rad)
+
+    X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
+    X = DataFrame({
+        'pre':pre_array,
+        'alb':alb_array,
+        'raa':raa_array,
+        'vza':vza_array,
+        'sza':sza_array,
+        'toz':toz_array})#, 'wav':wav_list}))
+    #print(rad.shape)
+    #print(rad_array.shape)
+    #print(rad[1, 1], rad[1, 1])
+    #print(rad[0, 0], rad[0, 1])
+    
+    #print(rad_array.shape)
+    rad_ = rad_array.reshape((prelen, 1460))
+
+    #print(rad_[1, 1], rad_[1, 1])
+    #print(rad_[0, 0], rad_[0, 1])
+    rad_mean = np.mean(rad_array, axis=0)
+    rad_std = np.std(rad_array, axis=0)
+    #print(rad_mean.shape)
+    rad_szamean = np.ndarray([prelen, 1460])
+    rad_szastd = np.ndarray([prelen, 1460])
+
+    #print(rad_szamean.shape)
+    for i in range(prelen):
+        rad_szamean[i, :] = rad_mean
+        rad_szastd[i, :] = rad_std
+
+
+    #print(rad_.shape)
+    rad_ = (rad_ - rad_szamean) / rad_szastd
+
+    Y = DataFrame(rad_)
+
+    train_dataset = RTM(X=X, y=Y, transform=None)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=128, shuffle=True)
+    return train_loader
+
+# flag
+def XY_data_loader_toz_v3_sza_radlog(pre_list, alb_list, raa_list, vza_list, 
+        sza_list, toz_list, 
+        rad, albwf, o3wf):
     (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
             ) = input_custom_normalize(pre_list, alb_list, 
                     raa_list, vza_list, sza_list, toz_list)
@@ -1775,7 +1931,7 @@ def XY_data_loader_toz_v3_sza_radlog(pre_list, alb_list, raa_list, vza_list, sza
     rad_array = np.log(rad)
     #rad_array = rad
 
-    X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
+    #X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
     X = DataFrame({
         'pre':pre_array,
         'alb':alb_array,
@@ -2008,18 +2164,23 @@ def XY_data_loader_toz_800_v2_sza_test(pre_list, alb_list, raa_list, vza_list, s
     test_loader = DataLoader(dataset=test_dataset, batch_size=128, shuffle=False)
     return test_loader
 
-
+# flag
 def XY_data_loader_single_wav_train(pre_list, alb_list, raa_list, vza_list, 
         sza_list, toz_list, wav_list, 
         rad, albwf, o3wf):
-    (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array,
-            wav_array, rad_array) = input_custom_normalize(pre_list, alb_list, 
+    prelen = len(pre_list)
+    (pre_array, alb_array, raa_array, vza_array, sza_array, toz_array
+            ) = input_custom_normalize(pre_list, alb_list, 
                     raa_list, vza_list, sza_list, toz_list)
+
+    prelen = len(pre_list)
+
     wav_array = wav_custom_normalize(wav_list)
     rad_array = np.log(rad) 
 
 
-    X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[]})
+    X = DataFrame({'pre':[], 'alb':[], 'raa':[], 'vza':[], 'sza':[], 'toz':[],
+            'wav':[]})
 
     X = DataFrame({
         'pre':pre_array,
@@ -2030,8 +2191,11 @@ def XY_data_loader_single_wav_train(pre_list, alb_list, raa_list, vza_list,
         'toz':toz_array,
         'wav':wav_array})#, 'wav':wav_list}))
 
+    print(rad_array.shape)
+    print(pre_array.shape)
+    print(prelen)
 
-    rad_array = rad_array.reshape((12*3*8*8*12*1460, 1))
+    rad_array = rad_array.reshape((prelen, 1))
     Y = DataFrame(rad_array)
 
     train_dataset = RTM(X=X, y=Y, transform=None)

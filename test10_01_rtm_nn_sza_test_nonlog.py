@@ -243,7 +243,8 @@ if __name__ == '__main__':
                 #correct += (predicted == radiances).sum().item()
                 #total += radiances.size(0)
                 if epoch_local % 500 == 0:
-                    for inbatch in range(len(test_loader)):
+            ##print(f_plot.detach().numpy().shape[0])
+                    for inbatch in range(features.detach().numpy().shape[0]):
                         filename = ('./plot/10_01_rtm_nn_nl24_' + lat + 
                                 '_toz300_epoch_' + str(epoch_local).zfill(8) +
                             '_test_index_' + str(i).zfill(8) + '_inbatch_' + str(inbatch).zfill(8))

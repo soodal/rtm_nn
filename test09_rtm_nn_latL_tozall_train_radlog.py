@@ -33,7 +33,7 @@ from ds_rtm_nn import load_LUT
 from ds_rtm_nn import features_maker_toz
 from ds_rtm_nn import XY_data_loader_toz_800_train_radlog
 from ds_rtm_nn import search_lat_LUT_files
-from ds_rtm_nn import rad_custom_normalize
+#from ds_rtm_nn import rad_custom_normalize
 from ds_rtm_nn import input_custom_normalize
 from ds_rtm_nn import wav_custom_normalize
 
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     model = MLPv01_6_800()
     print(model)
-    lr = 0.000001 # changed from 0.0001 after 223 epoch
+    lr = 0.0000001 # changed from 0.0001 after 223 epoch
 # changed from 0.00001 after 526 epoch
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
@@ -65,22 +65,35 @@ if __name__ == '__main__':
             ext = os.path.splitext(filename)[-1]
 
             if ext == '.pth':
-                _epoch = filename[28:33]
+                _epoch = filename[-12:-4]
                 _epoch_list.append(_epoch)
 
     if len(files) >= 1:
         torchstatefile = './states_09/' + sorted(files)[-1]
-        model.load_state_dict(torch.load(torchstatefile))
-        print(_epoch_list)
-        print(sorted(_epoch_list)[-1])
         real_epoch = int(sorted(_epoch_list)[-1]) + 1
         print('real_epoch = ', real_epoch)
+        if real_epoch == 621:
+            print(torchstatefile)
+            model.load_state_dict(torch.load(torchstatefile))
+        else:
+            checkpoint = torch.load(torchstatefile)
+            model.load_state_dict(checkpoint['model_state_dict'])
+            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            epoch_local = checkpoint['epoch']
+            loss = checkpoint['loss']
+            if real_epoch -1 !=  epoch_local:
+                print('epoch_local is different with real_epoch')
+                quit()
+
+        print(_epoch_list)
+        print(sorted(_epoch_list)[-1])
     else:
         real_epoch = 0
 
 #for epoch in range(epochs):
     epoch = real_epoch
     print('real_epoch is ', real_epoch)
+    epoch_local = real_epoch
     model.train()
     train_losses = np.array([])
     valid_losses = np.array([])
@@ -117,7 +130,6 @@ if __name__ == '__main__':
             (pre_list, alb_list, raa_list, vza_list, sza_list, toz_list) = features_maker_toz(
                     pre, alb, raa, vza, sza, toz)    
 
-            #rad_array = rad_custom_normalize(rad)
 
             train_loader = XY_data_loader_toz_800_train_radlog(pre_list, alb_list,
                     raa_list, vza_list, sza_list, toz_list, rad, albwf, o3wf)
@@ -148,12 +160,14 @@ if __name__ == '__main__':
                             datetime.datetime.now())
                     print(loss.item())
                     timestamp = time.time()
+            if epoch_local % 100 == 0:
+                filename = ('./plot/09_rtm_nn_' + lat + '_alltoz_epoch_' + str(epoch).zfill(8) +
+                    '_index_' + str(i).zfill(8))
+                test_plot300(epoch_local, i, features, wav300, radiances,
+                        outputs, filename, lr)
 
-                    timestamp = time.time()
-                outputs = None
-                loss = None
-                del outputs, loss
-                    
+
+
             print('model.eval()')
             model.eval()
             correct = 0
@@ -215,8 +229,8 @@ if __name__ == '__main__':
         #loss = msre(outputs, radiances)
         ##if i % 10 == 0:
             ##print(i, outputs)
-        #filename = ('./plot/09_rtm_nn_' + lat + '_alltoz_epoch_' + str(epoch).zfill(5) +
-            #'_index_' + str(batch_idx).zfill(5))
+        #filename = ('./plot/09_rtm_nn_' + lat + '_alltoz_epoch_' + str(epoch).zfill(8) +
+            #'_index_' + str(batch_idx).zfill(8))
         #if batch_idx == 0:
             #test_plot300(real_epoch, batch_idx, f_plot, wav300, r_plot,
                     #outputs, filename, lr)
@@ -232,22 +246,21 @@ if __name__ == '__main__':
     print('lossesfile')
     if os.path.exists(lossesfile):
         with open(lossesfile, 'a') as f:
-            f.write(str(real_epoch).zfill(5) + ',' + str(np.mean(train_losses))
+            f.write(str(real_epoch).zfill(8) + ',' + str(np.mean(train_losses))
                     + ',' + '\n')
     else:
         with open(lossesfile, 'w') as f:
             f.write('index,mean_train_losses,mean_valid_losses'+'\n')
-            f.write(str(real_epoch).zfill(5) + ',' + str(np.mean(train_losses))
+            f.write(str(real_epoch).zfill(8) + ',' + str(np.mean(train_losses))
                     + ',' + '\n')
 
 
     #real_epoch = real_epoch + 1
-    train_losses = None
-    valid_losses = None
-    del train_losses, valid_losses
 
-    print('torchstatefile')
-    torchstatefile = './states_09/09_rtm_nn_latL_tozall_epoch_' + str(epoch).zfill(5) + '.pth'
-    print('torchstatefile')
-    torch.save(model.state_dict(), torchstatefile)
-    print('done')
+    torchstatefile = './states_09/09_rtm_nn_latL_tozall_epoch_' + str(epoch).zfill(8) + '.pth'
+    #if real_epoch% 100 == 0:
+    torch.save({'epoch':real_epoch, 
+        'model_state_dict': model.state_dict(), 
+        'optimizer_state_dict':optimizer.state_dict(),
+        'loss': np.mean(train_losses)}, torchstatefile)
+    print('torch save, done')
