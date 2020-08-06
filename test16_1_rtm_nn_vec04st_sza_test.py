@@ -23,9 +23,10 @@ import numpy as np
 from pandas import DataFrame
 
 from sklearn.model_selection import train_test_split
+
 #import input_test01_rtm_nn as input_params
 
-from ds_rtm_nn import RTM
+#from ds_rtm_nn import RTM
 class MLPv03(nn.Module):
     def __init__(self):
 
@@ -91,14 +92,17 @@ if __name__ == '__main__':
 # set up the neural network
     projectname = '16_1_vec04st'
     
-    states_path = './states/project_' + projectname
-    plot_path = './plot/project_' + projectname
+    states_path = './states/project_' + projectname + '/'
+    plot_path = './plot/project_' + projectname + '/'
+    loss_path = './result/' 
     if not os.path.isdir(states_path):
         os.makedirs(states_path)
     if not os.path.isdir(plot_path):
         os.makedirs(plot_path)
+    if not os.path.isdir(loss_path):
+        os.makedirs(loss_path)
 
-    LUT_file = '/RSL2/soodal/1_DATA/GEMSTOOL/lutdata/LUTNC/LUT_vec04stNL24L300_sza_test_0.5deg.nc'
+    LUT_file = '/home/ubuntu/works/data/GEMSTOOL/lutdata/LUTNC/LUT_vec04stNL24L300_sza_test_0.5deg.nc'
 
 
     model = MLPv03()
@@ -118,7 +122,7 @@ if __name__ == '__main__':
     #load_epoch = 12500
 
     _epoch_list = []
-    for (path, dir, files) in os.walk('./states/project_' + projectname + '/'):
+    for (path, dir, files) in os.walk('./states/project_' + projectname):
         for filename in files:
             ext = os.path.splitext(filename)[-1]
 
@@ -129,10 +133,10 @@ if __name__ == '__main__':
 
     if len(files) >= 1:
         if 'load_epoch' not in globals().keys():
-            torchstatefile = './states/project_' + projectname + '/' + sorted(files)[-1]
+            torchstatefile = './states/project_' + projectname + sorted(files)[-1]
             load_epoch = int(sorted(_epoch_list)[-1])
         else:
-            torchstatefile = ('./states/project_' + projectname + '/' +
+            torchstatefile = ('./states/project_' + projectname +
                     projectname + '_rtm_nn_sza_test_epoch_' +
                 str(load_epoch).zfill(8) + '.pth')
             print(load_epoch)
@@ -264,15 +268,15 @@ if __name__ == '__main__':
             if _epoch % 100 == 0:
                 for inbatch in range(features.detach().numpy().shape[0]):
                     #print(i, outputs)
-                    filename = ('./plot/project_' + projectname + 
-                            '/' + projectname + 
+                    plotfn = (plot_path +  
+                            projectname + 
                             '_rtm_nn_nl24_' + lat + 
                             '_toz300_epoch_' + str(_epoch).zfill(8) + 
                             '_train_index_' + str(i).zfill(8) + 
                             '_inbatch_' + str(inbatch).zfill(8))
                     # every each epoch, plot for first
                     radplot_logradtorad(_epoch, inbatch, features, wav, 
-                            radiances, outputs, filename, lr)
+                            radiances, outputs, plotfn, lr)
                     
         model.eval()
         correct = 0
@@ -289,14 +293,14 @@ if __name__ == '__main__':
                
                 if _epoch % 100 == 0:
                     for inbatch in range(features.detach().numpy().shape[0]):
-                        filename = ('./plot/project_' + projectname + 
-                                '/' + projectname + 
+                        plotfn = (plot_path + 
+                                + projectname + 
                                 '_rtm_nn_nl24_' + lat + 
                                 '_toz300_epoch_' + str(_epoch).zfill(8) +
                                 '_test_index_' + str(i).zfill(8) + 
                                 '_inbatch_' + str(inbatch).zfill(8))
                         radplot_logradtorad(_epoch, inbatch, features, wav, radiances,
-                                outputs, filename, lr)
+                                outputs, plotfn, lr)
 
         #with open('./LUT/read_lut_list', 'a') as f:
             #f.write(LUT_file + '\n')
@@ -309,14 +313,15 @@ if __name__ == '__main__':
         #mean_test_losses.append(np.mean(test_losses))
         #print('len mean train losses ', len(mean_train_losses))
 
-        lossesfile = './result/' + projectname + '_rtm_nn_sza_test_mean_losses.txt' 
-        #print('lossesfile')
-        if os.path.exists(lossesfile):
-            with open(lossesfile, 'a') as f:
+        loss_path = './result/' 
+        lossfn = loss_path + projectname + '_rtm_nn_sza_test_mean_losses.txt' 
+        i
+        if os.path.exists(lossfn):
+            with open(lossfn, 'a') as f:
                 f.write(str(_epoch).zfill(8) + ',' + str(np.mean(train_losses))
                         + ',' + str(np.mean(test_losses)) + '\n')
         else:
-            with open(lossesfile, 'w') as f:
+            with open(lossfn, 'w') as f:
                 f.write('index,mean_train_losses,mean_valid_losses'+'\n')
                 f.write(str(_epoch).zfill(8) + ',' + str(np.mean(train_losses))
                         + ',' + str(np.mean(test_losses))  + '\n')
