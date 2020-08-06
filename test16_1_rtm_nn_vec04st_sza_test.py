@@ -90,10 +90,10 @@ from ds_rtm_nn import wav_custom_normalize
 
 if __name__ == '__main__':
 # set up the neural network
-    projectname = '16_1_vec04st'
+    project_name = '16_1_vec04st'
     
-    states_path = './states/project_' + projectname + '/'
-    plot_path = './plot/project_' + projectname + '/'
+    states_path = './states/project_' + project_name + '/'
+    plot_path = './plot/project_' + project_name + '/'
     loss_path = './result/' 
     if not os.path.isdir(states_path):
         os.makedirs(states_path)
@@ -122,7 +122,7 @@ if __name__ == '__main__':
     #load_epoch = 12500
 
     _epoch_list = []
-    for (path, dir, files) in os.walk('./states/project_' + projectname):
+    for (path, dir, files) in os.walk('./states/project_' + project_name):
         for filename in files:
             ext = os.path.splitext(filename)[-1]
 
@@ -133,11 +133,11 @@ if __name__ == '__main__':
 
     if len(files) >= 1:
         if 'load_epoch' not in globals().keys():
-            torchstatefile = './states/project_' + projectname + sorted(files)[-1]
+            torchstatefile = './states/project_' + project_name + sorted(files)[-1]
             load_epoch = int(sorted(_epoch_list)[-1])
         else:
-            torchstatefile = ('./states/project_' + projectname +
-                    projectname + '_rtm_nn_sza_test_epoch_' +
+            torchstatefile = ('./states/project_' + project_name +
+                    project_name + '_rtm_nn_sza_test_epoch_' +
                 str(load_epoch).zfill(8) + '.pth')
             print(load_epoch)
         epoch_total = int(sorted(_epoch_list)[-1]) + 1
@@ -269,7 +269,7 @@ if __name__ == '__main__':
                 for inbatch in range(features.detach().numpy().shape[0]):
                     #print(i, outputs)
                     plotfn = (plot_path +  
-                            projectname + 
+                            project_name + 
                             '_rtm_nn_nl24_' + lat + 
                             '_toz300_epoch_' + str(_epoch).zfill(8) + 
                             '_train_index_' + str(i).zfill(8) + 
@@ -294,7 +294,7 @@ if __name__ == '__main__':
                 if _epoch % 100 == 0:
                     for inbatch in range(features.detach().numpy().shape[0]):
                         plotfn = (plot_path + 
-                                + projectname + 
+                                project_name + 
                                 '_rtm_nn_nl24_' + lat + 
                                 '_toz300_epoch_' + str(_epoch).zfill(8) +
                                 '_test_index_' + str(i).zfill(8) + 
@@ -314,7 +314,7 @@ if __name__ == '__main__':
         #print('len mean train losses ', len(mean_train_losses))
 
         loss_path = './result/' 
-        lossfn = loss_path + projectname + '_rtm_nn_sza_test_mean_losses.txt' 
+        lossfn = loss_path + project_name + '_rtm_nn_sza_test_mean_losses.txt' 
         i
         if os.path.exists(lossfn):
             with open(lossfn, 'a') as f:
@@ -328,8 +328,8 @@ if __name__ == '__main__':
 
 
 
-        torchstatefile = ('./states/project_' + projectname + '/' + 
-            projectname + '_rtm_nn_sza_test_epoch_' + str(_epoch).zfill(8) + '.pth')
+        torchstatefile = ('./states/project_' + project_name + '/' + 
+            project_name + '_rtm_nn_sza_test_epoch_' + str(_epoch).zfill(8) + '.pth')
         if _epoch % 100 == 0:
             torch.save({'epoch':_epoch, 
                 'model_state_dict': model.state_dict(), 
